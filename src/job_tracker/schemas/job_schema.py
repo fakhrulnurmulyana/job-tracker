@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional
 
-class SalarySchema:
+class SalarySchema(BaseModel):
     displayed: bool = Field(
         default=False,
         description="wheter salary information is explicitly mentioned"

@@ -3,11 +3,9 @@ from typing import Optional
 
 import google.genai as genai
 
-from backend.prompts import build_job_normalization_prompt
-
 class GeminiClient:
     def __init__(self, *, api_key : Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = api_key
 
         if not self.api_key:
             raise RuntimeError(
@@ -15,7 +13,7 @@ class GeminiClient:
                 "Set it via environment variables or configuration."
             )
         
-        self.default_model = model or os.getenv("GEMINI_MODEL")
+        self.default_model = model 
 
         if not self.default_model:
             raise RuntimeError(

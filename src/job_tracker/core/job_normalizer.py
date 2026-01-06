@@ -1,11 +1,10 @@
-from backend.services import GeminiClient
-from backend.schemas import JobDocumentSchema
-from backend.prompts import build_job_normalization_prompt
+from job_tracker.schemas import JobDocumentSchema
+from job_tracker.prompts.job_normalization import build_job_normalization_prompt
 
 import json
 
 class JobNormalizer:
-    def __init__(self, client: GeminiClient):
+    def __init__(self, client):
         self.client = client
     
     def normalize(self, raw_text: str) -> JobDocumentSchema:
@@ -14,7 +13,7 @@ class JobNormalizer:
         raw_output = self.client.generate(prompt)
 
         try:
-            data = json.loads(raw_output)
+            data = json.loads(raw_output.text)
         except json.JSONDecodeError as e:
             raise ValueError("LLM output does not json")
         
