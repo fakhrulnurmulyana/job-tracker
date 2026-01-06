@@ -1,3 +1,9 @@
 # Environment
 .env
 .env.test
+
+# Python cache
+*__pycache__
+
+# File data
+/data
