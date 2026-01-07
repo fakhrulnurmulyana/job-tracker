@@ -7,3 +7,8 @@
 
 # File data
 /data
+
+# Logs
+/logs
+*.logs
+*.log
