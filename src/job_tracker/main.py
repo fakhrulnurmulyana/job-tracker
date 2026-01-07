@@ -37,7 +37,10 @@ def main() -> None:
 
     if content is None or not content.strip():
         file_writer.delete(path=raw_path, base_path=base_path)
-        logger.info("")
+        logger.info(
+            "Empty content detected; file has been removed: %s",
+            raw_path,
+        )
         return
 
     prompt = build_job_normalization_prompt(content)
