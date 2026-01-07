@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def build_job_normalization_prompt(raw_text: str) -> str:
     prompt =  f"""
 You are a data extraction and normalization engine.
@@ -65,4 +69,5 @@ JSON SCHEMA:
 INPUT:
 {raw_text}
 """
+    logger.info("Job normalization prompt has been success generate.")
     return prompt

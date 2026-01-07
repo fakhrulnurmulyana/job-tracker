@@ -1,37 +1,58 @@
-import os
 import logging
+import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-from job_tracker.utils import FileUtils
-from job_tracker.core import JobNormalizer
+import job_tracker.logging_config 
+
+from job_tracker.settings import load_gemini_config
 from job_tracker.services import GeminiClient
+from job_tracker.core import JobNormalizer
 from job_tracker.prompts.job_normalization import build_job_normalization_prompt
+from job_tracker.infrastructure import FileWriter, EditorLauncher, PathResolver
+from job_tracker.persistence import JobDocumentSaver
 
-import job_tracker.logging_config
+logger = logging.getLogger(__name__)
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-model = os.getenv("GEMINI_MODEL")
-
-def main(api_key:str=api_key, model:str=model):
-    file_utils = FileUtils()
-    client = GeminiClient(api_key=api_key, model=model)
-    job_normalizer = JobNormalizer(client=client)
-
-    file_name = input("Write name for the file :")
-    txt_path = file_utils.open_temp_file_for_editing(file_name)
-
-    with open(txt_path, "r", encoding="utf-8") as f:
-        content = f.read()
+def main() -> None:
+    config = load_gemini_config()
     
+    base_path=Path.cwd()
+
+    paths = PathResolver(base_path=base_path)
+    file_writer = FileWriter()
+    editor = EditorLauncher()
+    saver = JobDocumentSaver()
+    client = GeminiClient(api_key=config.api_key, model=config.model)
+    normalizer = JobNormalizer(client=client)
+
+    file_name = input("Write name for the file: ").strip().lower()
+
+    raw_path = paths.raw_file(file_name)
+    file_writer.write(raw_path)
+    editor.open(raw_path)
+
+    content = raw_path.read_text(encoding="utf-8")
+
+    if content is None or not content.strip():
+        file_writer.delete(path=raw_path, base_path=base_path)
+        logger.info("")
+        return
+
     prompt = build_job_normalization_prompt(content)
+    job_doc = normalizer.normalize(prompt)
 
-    json_data = job_normalizer.normalize(prompt)
+    output_name = f"{job_doc.job.title}_{job_doc.company.name}"
+    output_path = paths.processed_file(output_name)
 
-    json_file_name = f"{json_data.job.title}_{json_data.company.name}"
+    saver.save(job_doc, output_path)
 
-    file_utils.save_job_document(doc=json_data, file_name=json_file_name )
+    logger.info("Job normalization finished successfully")
 
 if __name__ == "__main__":
-    main(api_key=api_key, model=model)
+    try:
+        main()
+    except Exception:
+        logger.critical("Job normalization pipeline failed")
+        raise
