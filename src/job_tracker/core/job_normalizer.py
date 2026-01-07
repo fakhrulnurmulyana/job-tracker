@@ -3,13 +3,15 @@ from job_tracker.prompts.job_normalization import build_job_normalization_prompt
 
 import json
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class JobNormalizer:
     def __init__(self, client):
         self.client = client
     
-    def normalize(self, raw_text: str) -> JobDocumentSchema:
-        prompt = build_job_normalization_prompt(raw_text)
-
+    def normalize(self, prompt: str) -> JobDocumentSchema:
         raw_output = self.client.generate(prompt)
 
         try:
