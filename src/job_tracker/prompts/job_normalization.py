@@ -1,8 +1,14 @@
 import logging
 
+# Module-level logger for prompt generation
 logger = logging.getLogger(__name__)
 
 def build_job_normalization_prompt(raw_text: str) -> str:
+    """
+    Build a deterministic prompt for extracting and normalizing job vacancy data
+    into a strictly valid JSON structure.
+    """
+    # Use explicit and restrictive instructions to minimize LLM output variance
     prompt =  f"""
 You are a data extraction and normalization engine.
 
@@ -69,5 +75,6 @@ JSON SCHEMA:
 INPUT:
 {raw_text}
 """
+    # Log prompt generation for observability and debugging
     logger.info("Job normalization prompt has been success generate.")
     return prompt

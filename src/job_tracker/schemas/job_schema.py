@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional
 
 class SalarySchema(BaseModel):
+    """
+    Structured salary information with basic range validation.
+    """
     displayed: bool = Field(
         default=False,
         description="wheter salary information is explicitly mentioned"
@@ -21,6 +24,7 @@ class SalarySchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_range(self):
+        # Ensure salary range is logically valid
         if self.min is not None and self.max is not None:
             if self.min > self.max:
                 raise ValueError("salary.min cannot be greater then salary.max")
@@ -28,6 +32,9 @@ class SalarySchema(BaseModel):
         
     
 class JobSchema(BaseModel):
+    """
+    Core job-related information extracted from job postings.
+    """
     title: Optional[str] = None
     category: Optional[str] = None
     employment_type: Optional[str] = None
@@ -42,6 +49,9 @@ class JobSchema(BaseModel):
     requirements: List[str] = Field(default_factory=list)
 
 class CompanySchema(BaseModel):
+    """
+    Company-related metadata associated with the job posting.
+    """
     name: Optional[str] = None
     industry: Optional[str] = None
     employee_size: Optional[str] = None
@@ -49,15 +59,24 @@ class CompanySchema(BaseModel):
     about: Optional[str] = None
 
 class RecruiterSchema(BaseModel):
+    """
+    Recruiter or hiring contact information.
+    """
     name: Optional[str] = None
     initials: Optional[str] = None
     last_active: Optional[str] = None
 
 class SourceSchema(BaseModel):
+    """
+    Metadata describing the origin of the job posting.
+    """
     paltform: Optional[str] = None
     language: Optional[str] = None
 
 class JobDocumentSchema(BaseModel):
+    """
+    Aggregated normalized job document.
+    """
     job: JobSchema
     company: CompanySchema
     recruiter: RecruiterSchema
