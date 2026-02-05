@@ -46,11 +46,6 @@ if not root_logger.handlers:
     error_handler.setFormatter(formatter)
     error_handler.addFilter(StackTraceOnlyFilter())
 
-    # Console output for developer feedback
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-
     # Attach handlers to root logger
     root_logger.addHandler(app_handler)
     root_logger.addHandler(error_handler)
-    root_logger.addHandler(console_handler)

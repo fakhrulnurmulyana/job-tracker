@@ -35,7 +35,7 @@ def main() -> None:
     # Request user-defined file name for raw input
     file_name = silent_input("Write name for the file: ")
 
-    api_loader = LoadingStatus(f"Normalizing text in file {file_name}")
+    api_loader = LoadingStatus(f"Normalizing text in file {file_name}.txt ")
 
     # Create and open raw input file for user editing
     raw_path = paths.raw_file(file_name)
@@ -64,7 +64,7 @@ def main() -> None:
         api_loader.stop()
     
     # Generate output file name based on normalized data
-    output_name = f"{job_doc.job.title}_{job_doc.company.name}"
+    output_name = f"{job_doc.job.category}_{job_doc.company.name}"
     output_path = paths.processed_file(output_name)
 
     # Persist normalized job document
