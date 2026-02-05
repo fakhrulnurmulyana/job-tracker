@@ -7,7 +7,7 @@ from job_tracker.settings import load_gemini_config
 from job_tracker.services import GeminiClient
 from job_tracker.core import JobNormalizer
 from job_tracker.prompts.job_normalization import build_job_normalization_prompt
-from job_tracker.infrastructure import FileWriter, EditorLauncher, PathResolver
+from job_tracker.infrastructure import FileWriter, EditorLauncher, LoadingStatus, PathResolver
 from job_tracker.persistence import JobDocumentSaver
 
 # Module-level logger for this entrypoint
@@ -24,15 +24,18 @@ def main() -> None:
     base_path=Path.cwd()
 
     # Initialize infrastructure and service dependencies
-    paths = PathResolver(base_path=base_path)
-    file_writer = FileWriter()
     editor = EditorLauncher()
+    file_writer = FileWriter()
+    paths = PathResolver(base_path=base_path)
     saver = JobDocumentSaver()
+    
     client = GeminiClient(api_key=config.api_key, model=config.model)
     normalizer = JobNormalizer(client=client)
 
     # Request user-defined file name for raw input
     file_name = input("Write name for the file: ").strip().lower()
+
+    api_loader = LoadingStatus(f"Normalizing text in file {file_name}")
 
     # Create and open raw input file for user editing
     raw_path = paths.raw_file(file_name)
@@ -54,8 +57,12 @@ def main() -> None:
 
     # Build prompt and normalize job description via LLM
     prompt = build_job_normalization_prompt(content)
-    job_doc = normalizer.normalize(prompt)
-
+    try:
+        api_loader.start()
+        job_doc = normalizer.normalize(prompt)
+    finally:
+        api_loader.stop()
+    
     # Generate output file name based on normalized data
     output_name = f"{job_doc.job.title}_{job_doc.company.name}"
     output_path = paths.processed_file(output_name)
