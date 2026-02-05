@@ -89,6 +89,11 @@ All configuration is loaded and validated centrally via `settings.py`.
 ---
 
 ## How to Run
+set PYTHONPATH first:
+
+```bash
+set PYTHONPATH=src
+```
 
 Run the application using the module entry point:
 
