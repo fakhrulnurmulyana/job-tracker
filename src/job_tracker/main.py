@@ -41,6 +41,7 @@ def main() -> None:
 
     # Read user-provided job description
     content = raw_path.read_text(encoding="utf-8")
+    content = content.lower()
 
     # Abort early if input is empty and clean up created file
     if content is None or not content.strip():
