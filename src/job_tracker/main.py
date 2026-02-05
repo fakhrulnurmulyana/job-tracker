@@ -7,7 +7,7 @@ from job_tracker.settings import load_gemini_config
 from job_tracker.services import GeminiClient
 from job_tracker.core import JobNormalizer
 from job_tracker.prompts.job_normalization import build_job_normalization_prompt
-from job_tracker.infrastructure import FileWriter, EditorLauncher, LoadingStatus, PathResolver
+from job_tracker.infrastructure import FileWriter, EditorLauncher, LoadingStatus, PathResolver, silent_input
 from job_tracker.persistence import JobDocumentSaver
 
 # Module-level logger for this entrypoint
@@ -33,7 +33,7 @@ def main() -> None:
     normalizer = JobNormalizer(client=client)
 
     # Request user-defined file name for raw input
-    file_name = input("Write name for the file: ").strip().lower()
+    file_name = silent_input("Write name for the file: ")
 
     api_loader = LoadingStatus(f"Normalizing text in file {file_name}")
 
