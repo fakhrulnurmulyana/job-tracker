@@ -109,15 +109,45 @@ class ExperienceSchema(BaseModel):
         description="Maximum required experience in years"
     )
 
+class EducationSchema(BaseModel):
+    """
+    Structured experience requirement in years.
+    """
+    min_education: Literal[
+        "high_school",
+        "diploma",
+        "bachelor_degree",
+        "master_degree",
+        "doctoral_degree",
+    ] = Field(
+        default=None,
+        description="Minimum required education in years"
+    )
+    max_education: Literal[
+        "high_school",
+        "diploma",
+        "bachelor_degree",
+        "master_degree",
+        "doctoral_degree",
+    ] = Field(
+        default=None,
+        description="Maximum required education in years"
+    )
+
 class JobSchema(BaseModel):
     """
     Core job-related information.
     """
     link: HttpUrl
     title: Optional[str] = None
-    category: Optional[
-        Literal["ai engineer", "ml engineer", "data analyst", "data engineer", "odoo developer", "python developer"]
-    ] = None
+    category: Literal[
+        "ai engineer", 
+        "ml engineer", 
+        "data analyst", 
+        "data engineer", 
+        "odoo developer", 
+        "python developer",
+    ] = Field(default="unknown")
     employment_type: Optional[
         Literal["full_time", "part_time", "contract", "internship", "freelance"]
     ] = None
@@ -128,7 +158,10 @@ class JobSchema(BaseModel):
         default_factory=ExperienceSchema,
         description="Structured experience requirement"
     )
-    education_required: Optional[str] = None
+    education_required: EducationSchema = Field(
+        default_factory=EducationSchema,
+        description="Structured education requirement"
+    )
     posted_at: Optional[str] = None
     updated_at: Optional[str] = None
     salary: SalarySchema = Field(default_factory=SalarySchema)

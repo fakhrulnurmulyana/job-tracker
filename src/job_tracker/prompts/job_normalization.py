@@ -123,6 +123,8 @@ ENUM CONSTRAINTS:
   open, applied, interview, offered, rejected, closed, unknown
 - job.category:
   ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer
+- job.education_required.min_education and  job.education_required.max_education:
+  "high_school", "diploma", "bachelor_degree", "master_degree", "doctoral_degree",
 
 REQUIREMENT DETAILS RULES:
 - Use requirement.details ONLY for supplementary information
@@ -163,7 +165,10 @@ JSON SCHEMA:
       "min_experience": null,
       "max_experience": null
     }},
-    "education_required": null,
+    "education_required": {{
+      "min_education": null,
+      "max_education": null
+    }},
     "posted_at": null,
     "updated_at": null,
     "salary": {{
