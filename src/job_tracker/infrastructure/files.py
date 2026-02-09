@@ -32,7 +32,7 @@ class FileWriter:
 
         logger.info("File written: %s", path)
     
-    def delete(path:Path)->None:
+    def delete(self, path:Path)->None:
         """
         Safely delete a file if it exists and is a regular file.
         """
