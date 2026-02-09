@@ -5,7 +5,7 @@ import job_tracker.logging_config
 
 from job_tracker.settings import load_gemini_config
 from job_tracker.services import GeminiClient
-from job_tracker.core import JobNormalizer
+from job_tracker.core import JobNormalizer, strip_html
 from job_tracker.prompts.job_normalization import build_job_normalization_prompt
 from job_tracker.infrastructure import FileWriter, EditorLauncher, LoadingStatus, PathResolver, silent_input
 from job_tracker.persistence import JobDocumentSaver
@@ -35,7 +35,7 @@ def main() -> None:
     # Request user-defined file name for raw input
     file_name = silent_input("Write name for the file: ")
 
-    api_loader = LoadingStatus(f"Normalizing text in file {file_name}.txt ")
+    api_loader = LoadingStatus(f"Normalizing text in file {file_name}.txt ") 
 
     # Create and open raw input file for user editing
     raw_path = paths.raw_file(file_name)
@@ -44,19 +44,27 @@ def main() -> None:
 
     # Read user-provided job description
     content = raw_path.read_text(encoding="utf-8")
-    content = content.lower()
 
     # Abort early if input is empty and clean up created file
     if content is None or not content.strip():
-        file_writer.delete(path=raw_path, base_path=base_path)
+        file_writer.delete(path=raw_path)
         logger.info(
             "Empty content detected; file has been removed: %s",
             raw_path,
         )
         return
 
+    cleaned_content = strip_html(content)
+
+    cleaned_path = paths.cleaned_file(file_name)
+    file_writer.write(cleaned_path, cleaned_content)
+    logger.info("Cleaned_file has been generate")
+    
+
+    cleaned_content = cleaned_content.lower()
+
     # Build prompt and normalize job description via LLM
-    prompt = build_job_normalization_prompt(content)
+    prompt = build_job_normalization_prompt(cleaned_content)
     try:
         api_loader.start()
         job_doc = normalizer.normalize(prompt)
@@ -65,10 +73,11 @@ def main() -> None:
     
     # Generate output file name based on normalized data
     output_name = f"{job_doc.job.category}_{job_doc.company.name}"
-    output_path = paths.processed_file(output_name)
+
+    finalized_path =  paths.finalized_file(output_name)
 
     # Persist normalized job document
-    saver.save(job_doc, output_path)
+    saver.save(job_doc, finalized_path)
 
     logger.info("Job normalization finished successfully")
 
