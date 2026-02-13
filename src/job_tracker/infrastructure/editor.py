@@ -1,14 +1,20 @@
 import os
 import subprocess
 import sys
+
 from pathlib import Path
+from typing import Optional
 
 
 class EditorLauncher:
     """
     Utility for opening files in a system editor.
     """
-    def open(self, path: Path, editor: str | None = None) -> None:
+    def open(
+            self, 
+            path: Path, 
+            editor:Optional[str] = None
+    ) -> None:
         """
         Open a file in the specified editor or fall back to system defaults.
         """

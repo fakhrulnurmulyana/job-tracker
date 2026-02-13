@@ -21,7 +21,13 @@ class LoadingStatus:
         self._thread = threading.Thread(target=self._run)
         self._thread.start()
 
-    def stop(self):
+    def _stop_event(self):
         self._stop.set()
+
+    def true_stop(self):
+        self._stop_event()
         self._thread.join()
         print(f"✓ {self.text} Done")
+
+    def false_stop(self):
+        self._stop_event()

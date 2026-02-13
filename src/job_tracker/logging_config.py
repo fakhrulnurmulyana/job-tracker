@@ -17,6 +17,13 @@ class StackTraceOnlyFilter(logging.Filter):
     """
     def filter(self, record: logging.LogRecord) -> bool:
         return record.exc_info is not None
+    
+
+class DebugOnlyFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.levelno == logging.DEBUG
+    
+
 
 # Directory for log files (created once at startup)
 LOG_DIR = Path.cwd() / "logs"
@@ -29,23 +36,38 @@ formatter = logging.Formatter(
 
 # Configure root logger as a single source of truth
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(logging.DEBUG)
 
 # Prevent duplicate handler registration on repeated imports
 if not root_logger.handlers:
 
     # Application log without stack traces
-    app_handler = logging.FileHandler(LOG_DIR / "app.log", encoding="utf-8")
+    app_handler = logging.FileHandler(
+        LOG_DIR / "app.log", 
+        encoding="utf-8",
+    )
     app_handler.setLevel(logging.INFO)
     app_handler.setFormatter(formatter)
     app_handler.addFilter(NoStackTraceFilter())
 
     # Error log containing only stack traces
-    error_handler = logging.FileHandler(LOG_DIR / "error.log", encoding="utf-8")
+    error_handler = logging.FileHandler(
+        LOG_DIR / "error.log", 
+        encoding="utf-8",
+    )
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(formatter)
     error_handler.addFilter(StackTraceOnlyFilter())
 
+    debug_handler = logging.FileHandler(
+        LOG_DIR / "debug.log",
+        encoding="utf-8"
+    )
+    debug_handler.setLevel(logging.DEBUG)
+    debug_handler.setFormatter(formatter)
+    debug_handler.addFilter(DebugOnlyFilter())
+
     # Attach handlers to root logger
     root_logger.addHandler(app_handler)
     root_logger.addHandler(error_handler)
+    root_logger.addHandler(debug_handler)

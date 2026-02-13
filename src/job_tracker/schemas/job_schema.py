@@ -123,15 +123,17 @@ class EducationSchema(BaseModel):
         default=None,
         description="Minimum required education in years"
     )
-    max_education: Literal[
-        "high_school",
-        "diploma",
-        "bachelor_degree",
-        "master_degree",
-        "doctoral_degree",
+    max_education: Optional[
+        Literal[
+            "high_school",
+            "diploma",
+            "bachelor_degree",
+            "master_degree",
+            "doctoral_degree",
+        ]
     ] = Field(
         default=None,
-        description="Maximum required education in years"
+        description="Maximum required education level"
     )
 
 class JobSchema(BaseModel):

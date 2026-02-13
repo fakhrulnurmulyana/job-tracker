@@ -1,9 +1,10 @@
 import logging
 
+from typing import List
 # Module-level logger for prompt generation
 logger = logging.getLogger(__name__)
 
-def build_job_normalization_prompt(raw_text: str) -> str:
+def _build_job_normalization_prompt(raw_text: str) -> str:
     """
     Build a deterministic prompt for extracting and normalizing job vacancy data
     into a strictly valid JSON structure.
@@ -211,3 +212,27 @@ INPUT:
     # Log prompt generation for observability and debugging
     logger.info("Job normalization prompt generated successfully.")
     return prompt
+
+def build_batch_job_normalization_prompt(raw_text_list: List[str], data_length:int) -> List[str]:
+    batch_raw_text_length = len(raw_text_list)
+    
+    if batch_raw_text_length != data_length:
+      expected = data_length
+      actual = batch_raw_text_length
+
+      logger.error(
+          "Generate prompts failed — mismatch length (expected=%d, actual=%d)",
+          expected,
+          actual,
+      )
+
+      raise ValueError(
+          f"Batch text length mismatch (expected={expected}, actual={actual})"
+      )
+    
+    prompts=list()
+    
+    for raw_text in raw_text_list:
+        prompt = _build_job_normalization_prompt(raw_text=raw_text)
+        prompts.append(prompt)
+    return prompts
