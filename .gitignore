@@ -12,3 +12,7 @@
 /logs
 *.logs
 *.log
+
+# Batch file
+*.bat
+*.batch
