@@ -9,11 +9,11 @@ from job_tracker.core import JobNormalizer
 from job_tracker.infrastructure import (
     FileHandler,
     FileSplitter,
+    JobDocumentSaver,
     EditorLauncher,
     PathResolver,
     silent_input,
 )
-from job_tracker.persistence import JobDocumentSaver
 
 
 logger = logging.getLogger(__name__)
