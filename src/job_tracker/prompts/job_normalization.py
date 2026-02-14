@@ -6,8 +6,26 @@ logger = logging.getLogger(__name__)
 
 def _build_job_normalization_prompt(raw_text: str) -> str:
     """
-    Build a deterministic prompt for extracting and normalizing job vacancy data
-    into a strictly valid JSON structure.
+    Build a deterministic prompt for extracting and normalizing
+    job vacancy data into a strictly valid JSON structure.
+
+    The prompt enforces strict rules for:
+      - Salary normalization
+      - Experience extraction
+      - Requirements extraction and atomicity
+      - Requirement priority, level, and category
+      - Riba detection
+      - Enum constraints for job and application fields
+
+    Args:
+        raw_text (str): Raw job vacancy text to be normalized.
+
+    Returns:
+        str: Formatted LLM prompt ready for job normalization.
+
+    Notes:
+        This is a private helper function and intended to be called
+        either individually or as part of a batch prompt generator.
     """
     # Use explicit and restrictive instructions to minimize LLM output variance
     prompt =  f"""
@@ -213,7 +231,27 @@ INPUT:
     logger.info("Job normalization prompt generated successfully.")
     return prompt
 
-def build_batch_job_normalization_prompt(raw_text_list: List[str], data_length:int) -> List[str]:
+def build_batch_job_normalization_prompt(
+      raw_text_list: List[str], 
+      data_length:int,
+    ) -> List[str]:
+    """
+    Generate a batch of job normalization prompts from raw texts.
+
+    Args:
+        raw_text_list (List[str]): List of raw job vacancy texts.
+        data_length (int): Expected number of items in the batch.
+
+    Returns:
+        List[str]: List of formatted prompts for each raw text.
+
+    Raises:
+        ValueError: If the length of raw_text_list does not match data_length.
+
+    Notes:
+        Each prompt is built using `_build_job_normalization_prompt`,
+        ensuring consistency and strict JSON schema enforcement.
+    """
     batch_raw_text_length = len(raw_text_list)
     
     if batch_raw_text_length != data_length:

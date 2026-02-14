@@ -1,8 +1,7 @@
-import inspect
 import json
 import logging
 
-from typing import List, Dict, Any
+from typing import List
 
 from job_tracker.schemas import JobDocumentSchema
 from job_tracker.core import LLMClient
@@ -12,22 +11,48 @@ logger = logging.getLogger(__name__)
 
 class JobNormalizer:
     """
-    Orchestrates prompt execution and validates normalized output
-    against the domain schema.
+    Coordinate LLM prompt execution and validate structured output.
+
+    This class is responsible for:
+    - Sending normalization prompts to the LLM client
+    - Parsing the raw JSON response
+    - Validating the structured data against JobDocumentSchema
+
+    The LLM client is injected to keep the class decoupled
+    and easily testable.
     """
     def __init__(self, client: LLMClient) -> None:
+        """
+        Initialize the normalizer with an LLM client.
+
+        Args:
+            client (LLMClient): LLM client used to generate responses.
+        """
         # Inject LLM dependency to keep this class testable and decoupled
         self.client = client
     
     def _normalize(self, prompt: str) -> JobDocumentSchema:
         """
-        Execute normalization prompt and validate the structured result.
+        Execute a normalization prompt and validate the structured result.
+
+        The method:
+        1. Sends the prompt to the LLM client
+        2. Parses the JSON response
+        3. Validates the parsed data using JobDocumentSchema
+
+        Args:
+            prompt (str): Normalization prompt sent to the LLM.
+
+        Returns:
+            JobDocumentSchema: Validated and structured job document.
+
+        Raises:
+            json.JSONDecodeError: If the LLM response is not valid JSON.
+            Exception: If schema validation fails.
         """
         # Invoke LLM client
         response = self.client.generate(prompt)
         logger.debug("Response type: %s", type(response))
-        # for name, value in inspect.getmembers(response):
-        #     logger.debug("Attr: %s = %r", name, value)
 
         try:
             # Parse raw LLM output into JSON
@@ -48,6 +73,24 @@ class JobNormalizer:
         return result
     
     def batch_normalize(self, prompts:List[str], data_length:int)->List[JobDocumentSchema]:
+        """
+        Normalize multiple prompts in batch mode.
+
+        This method validates that the number of prompts matches
+        the expected data length before processing. Each prompt
+        is normalized individually using the internal `_normalize` method.
+
+        Args:
+            prompts (List[str]): List of normalization prompts.
+            data_length (int): Expected number of prompts.
+
+        Returns:
+            List[JobDocumentSchema]: List of validated job documents.
+
+        Raises:
+            ValueError: If the number of prompts does not match data_length.
+            Exception: If any individual normalization fails.
+        """
         batch_prompt = len(prompts)
     
         if batch_prompt != data_length:

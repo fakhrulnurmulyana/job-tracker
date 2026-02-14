@@ -10,18 +10,36 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiClientError(Exception):
-    """Base exception for Gemini client errors."""
+    """
+    Base exception for errors raised by GeminiClient.
+    """
+    pass
 
 
 class ServiceUnavailableError(GeminiClientError):
-    """Raised when Gemini service is temporarily unavailable."""
+    """
+    Raised when the Gemini service is temporarily unavailable,
+    e.g., due to server errors (5xx) or service throttling.
+    """
+    pass
 
 
 class GeminiClient:
     """
-    Production-ready wrapper around Gemini SDK.
-    Handles retry, error mapping, and logging.
+    Production-ready wrapper around the Google Gemini SDK.
+
+    Responsibilities:
+        - Initialize Gemini client with API key and model.
+        - Provide a `generate` method for text completion.
+        - Handle retries for transient errors (ServiceUnavailableError).
+        - Centralize logging for observability and debugging.
+
+    Attributes:
+        _default_model (str): Default model to use if not specified in generate().
+        _timeout (int): Request timeout in seconds.
+        _client (genai.Client): Underlying Gemini SDK client instance.
     """
+
 
     def __init__(
         self,
@@ -30,6 +48,17 @@ class GeminiClient:
         model: Optional[str] = None,
         timeout: int = 60,
     ) -> None:
+        """
+        Initialize GeminiClient with API key and default model.
+
+        Args:
+            api_key (Optional[str]): Gemini API key (must be provided).
+            model (Optional[str]): Default model to use for generation.
+            timeout (int): Request timeout in seconds (default=60).
+
+        Raises:
+            RuntimeError: If `api_key` or `model` is not provided.
+        """
 
         if not api_key:
             raise RuntimeError(
@@ -60,7 +89,19 @@ class GeminiClient:
         retries: int = 3,
     ) -> str:
         """
-        Generate text from Gemini with retry support.
+        Generate text from Gemini using a prompt, with retry support.
+
+        Args:
+            prompt (str): The text prompt to send to the Gemini model.
+            model (Optional[str]): Model to use for this request. Defaults to `_default_model`.
+            retries (int): Number of retry attempts for transient errors (default=3).
+
+        Returns:
+            str: Generated text returned by Gemini.
+
+        Raises:
+            ServiceUnavailableError: If the Gemini service is unavailable after retries.
+            GeminiClientError: For non-retryable errors during generation.
         """
 
         model_to_use = model or self._default_model
@@ -79,7 +120,21 @@ class GeminiClient:
         model: str,
         retries: int,
     ) -> str:
+        """
+        Internal helper to handle retries on transient Gemini errors.
 
+        Args:
+            prompt (str): The prompt to send.
+            model (str): Model to use.
+            retries (int): Number of retry attempts.
+
+        Returns:
+            str: Generated text from Gemini.
+
+        Raises:
+            ServiceUnavailableError: If Gemini service remains unavailable after retries.
+            GeminiClientError: For non-retryable errors.
+        """
         for attempt in range(1, retries + 1):
             try:
                 return self._call_gemini(prompt=prompt, model=model)
@@ -109,7 +164,18 @@ class GeminiClient:
 
     def _call_gemini(self, *, prompt: str, model: str) -> str:
         """
-        Actual SDK call isolated here.
+        Perform the actual SDK call to Gemini.
+
+        Args:
+            prompt (str): Prompt text.
+            model (str): Model name.
+
+        Returns:
+            str: Generated text from Gemini.
+
+        Raises:
+            ServiceUnavailableError: For server-side (5xx) errors.
+            GeminiClientError: For unexpected client-side errors.
         """
 
         try:

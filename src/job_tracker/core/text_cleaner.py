@@ -8,7 +8,20 @@ logger = logging.getLogger(__name__)
 
 def _strip_html(html: str) -> str:
     """
-    Remove HTML tags and return clean text.
+    Remove HTML tags and return cleaned plain text.
+
+    This function parses the input HTML string using BeautifulSoup
+    and extracts readable text content while preserving word spacing.
+
+    Args:
+        html (str): Raw HTML content.
+
+    Returns:
+        str: Cleaned text with HTML tags removed.
+
+    Raises:
+        ValueError: If html is None.
+        Exception: If HTML parsing fails.
     """
     logger.debug("Starting HTML stripping process.")
 
@@ -28,7 +41,22 @@ def _strip_html(html: str) -> str:
 
 def batch_strip_html(batch_html: List[str], data_length: int) -> List[str]:
     """
-    Process multiple HTML strings and return cleaned lowercase text.
+    Clean multiple HTML strings in batch mode.
+
+    This function validates that the input batch length matches
+    the expected data length before processing. Each HTML string
+    is stripped and converted to lowercase.
+
+    Args:
+        batch_html (List[str]): List of raw HTML strings.
+        data_length (int): Expected number of HTML items.
+
+    Returns:
+        List[str]: List of cleaned and lowercase text strings.
+
+    Raises:
+        ValueError: If batch_html length does not match data_length.
+        Exception: If any individual HTML cleaning fails.
     """
     batch_html_length =len(batch_html)
 

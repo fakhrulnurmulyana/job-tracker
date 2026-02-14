@@ -10,15 +10,37 @@ logger = logging.getLogger(__name__)
 
 class FileHandler:
     """
-    Utility class responsible for safe file write and delete operations.
+    Provide safe and controlled file read, write, and delete operations.
+
+    This class ensures:
+    - Atomic file writes using temporary files
+    - Validation of non-empty content
+    - Safe file deletion
+    - Batch processing support
+    - Consistent logging and error handling
     """
 
     def _is_empty(self, content: Optional[str]) -> bool:
+        """
+        Check whether content is empty or contains only whitespace.
+
+        Args:
+            content (Optional[str]): File content.
+
+        Returns:
+            bool: True if content is None or empty after stripping.
+        """
         return content is None or not content.strip()
 
     def _delete(self, path: Path) -> None:
         """
         Safely delete a file if it exists and is a regular file.
+
+        Args:
+            path (Path): Target file path.
+
+        Raises:
+            OSError: If file deletion fails.
         """
         logger.debug("Attempting to delete file: %s", path)
 
@@ -43,6 +65,18 @@ class FileHandler:
         content: Optional[str],
         path: Path,
     ) -> None:
+        """
+        Ensure file content is not empty.
+
+        If content is empty, the file is deleted and a ValueError is raised.
+
+        Args:
+            content (Optional[str]): File content.
+            path (Path): Associated file path.
+
+        Raises:
+            ValueError: If content is empty.
+        """
         logger.debug("Validating non-empty content for: %s", path)
 
         if self._is_empty(content):
@@ -55,12 +89,34 @@ class FileHandler:
         contents: List[str],
         paths: List[Path],
     ) -> None:
+        """
+        Validate non-empty content for multiple files.
+
+        Args:
+            contents (List[str]): List of file contents.
+            paths (List[Path]): Corresponding file paths.
+
+        Raises:
+            ValueError: If any content is empty.
+        """
         logger.debug("Validating batch non-empty content (%d files)", len(paths))
 
         for path, content in zip(paths, contents):
             self._enforce_non_empty(content=content, path=path)
 
     def _read(self, path: Path) -> str:
+        """
+        Read file content as UTF-8 text.
+
+        Args:
+            path (Path): File path to read.
+
+        Returns:
+            str: File content.
+
+        Raises:
+            OSError: If file reading fails.
+        """
         logger.debug("Reading file: %s", path)
 
         try:
@@ -72,6 +128,19 @@ class FileHandler:
             raise
 
     def _read_batch(self, paths: List[Path]) -> List[str]:
+        """
+        Read multiple files in batch mode.
+
+        Args:
+            paths (List[Path]): List of file paths.
+
+        Returns:
+            List[str]: List of file contents.
+
+        Raises:
+            ValueError: If paths list is empty.
+            OSError: If any file read fails.
+        """
         if not paths:
             logger.error("Read batch failed — empty path list provided")
             raise ValueError("paths must not be empty")
@@ -92,7 +161,18 @@ class FileHandler:
         overwrite: bool = False,
     ) -> None:
         """
-        Write content to a file, optionally preventing overwrite.
+        Write content to a file using atomic replacement.
+
+        If overwrite is False and the file already exists,
+        the write operation is skipped.
+
+        Args:
+            path (Path): Target file path.
+            content (Optional[str]): File content to write.
+            overwrite (bool): Whether to overwrite existing file.
+
+        Raises:
+            OSError: If file writing fails.
         """
         logger.debug(
             "Preparing to write file: %s (overwrite=%s)",
@@ -123,6 +203,17 @@ class FileHandler:
         paths: List[Path],
         contents: List[str],
     ) -> None:
+        """
+        Write multiple files in batch mode.
+
+        Args:
+            paths (List[Path]): List of target file paths.
+            contents (List[str]): Corresponding file contents.
+
+        Raises:
+            ValueError: If paths and contents lengths differ.
+            OSError: If any file write fails.
+        """
         if len(paths) != len(contents):
             logger.error(
                 "Write batch failed — mismatch length (paths=%d, contents=%d)",
@@ -142,6 +233,22 @@ class FileHandler:
         logger.info("Batch write completed (%d files)", len(paths))
 
     def consume(self, path: Path) -> str:
+        """
+        Read and validate a file's content.
+
+        This method reads a file and ensures its content
+        is not empty.
+
+        Args:
+            path (Path): File path to consume.
+
+        Returns:
+            str: Validated file content.
+
+        Raises:
+            ValueError: If file content is empty.
+            OSError: If file reading fails.
+        """
         logger.info("Consuming file: %s", path)
 
         content = self._read(path=path)
@@ -151,6 +258,19 @@ class FileHandler:
         return content
 
     def batch_consume(self, paths: List[Path]) -> List[str]:
+        """
+        Read and validate multiple files in batch mode.
+
+        Args:
+            paths (List[Path]): List of file paths.
+
+        Returns:
+            List[str]: List of validated file contents.
+
+        Raises:
+            ValueError: If any file content is empty.
+            OSError: If file reading fails.
+        """
         logger.info("Consuming batch of %d files", len(paths))
 
         contents = self._read_batch(paths=paths)

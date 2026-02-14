@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 class GeminiConfig:
     """
     Immutable configuration object for Gemini client settings.
+
+    Attributes:
+        api_key (str): API key used for authenticating with the Gemini service.
+        model (str): Default model name to use for LLM requests.
     """
     api_key: str
     model: str
@@ -17,11 +21,16 @@ def load_gemini_config() -> GeminiConfig:
     """
     Load Gemini configuration from environment variables.
 
+    This function reads environment variables (optionally from a `.env` file)
+    and validates that all required Gemini configuration values are present.
+    Returns an immutable GeminiConfig object suitable for initializing
+    the Gemini client.
+
     Raises:
-        RuntimeError: If required environment variables are missing.
+        RuntimeError: If either `GEMINI_API_KEY` or `GEMINI_MODEL` is missing.
 
     Returns:
-        GeminiConfig: Validated Gemini configuration.
+        GeminiConfig: Immutable, validated configuration for Gemini client.
     """
     # Load environment variables from .env file into process environment
     load_dotenv()

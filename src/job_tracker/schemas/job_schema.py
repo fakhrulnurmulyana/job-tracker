@@ -3,6 +3,14 @@ from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 
 class RibaSchema(BaseModel):
+    """
+    Schema representing whether a job involves riba-related activities.
+
+    Attributes:
+        is_riba (bool): Whether the job involves riba or not.
+        relation (Literal['direct', 'indirect', 'none']): Level of involvement.
+        reason (Optional[str]): Explanation why the job is considered riba.
+    """
     is_riba: bool = Field(
         description="Whether the job involves riba or not"
     )
@@ -16,6 +24,12 @@ class RibaSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_riba_logic(self):
+        """
+        Validate logical consistency between `is_riba`, `relation`, and `reason`.
+
+        Raises:
+            ValueError: If combination of fields is inconsistent.
+        """
         if self.is_riba:
             if not self.reason:
                 raise ValueError("reason must be provided when is_riba is true")
@@ -31,8 +45,13 @@ class RibaSchema(BaseModel):
 
 class SalarySchema(BaseModel):
     """
-    Structured salary information with validation rules
-    aligned with LLM normalization constraints.
+    Structured salary information.
+
+    Attributes:
+        displayed (bool): Whether salary is explicitly mentioned.
+        currency (str): Currency code (ISO 4217), default 'IDR'.
+        min (Optional[int]): Minimum salary.
+        max (Optional[int]): Maximum salary.
     """
     displayed: bool = Field(
         default=False,
@@ -53,6 +72,10 @@ class SalarySchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_salary(self):
+        """
+        Ensure displayed is True if min or max exists,
+        and min <= max.
+        """
         if self.min is not None or self.max is not None:
             self.displayed = True
 
@@ -65,7 +88,15 @@ class SalarySchema(BaseModel):
 
 class RequirementSchema(BaseModel):
     """
-    Structured job requirement with semantic enrichment.
+    Structured job requirement.
+
+    Attributes:
+        name (Optional[str]): Requirement name (short, atomic, e.g., 'Python').
+        category (Optional[Literal[...]): Requirement category.
+        level (Optional[Literal['beginner','intermediate','advanced']]): Skill level.
+        priority (Optional[Literal['must_have','nice_to_have']]): Importance of requirement.
+        years_experience (Optional[int]): Required experience years.
+        details (List[str]): Supplementary atomic details (e.g., technologies).
     """
     name: Optional[str] = Field(
         default=None,
@@ -99,6 +130,10 @@ class RequirementSchema(BaseModel):
 class ExperienceSchema(BaseModel):
     """
     Structured experience requirement in years.
+
+    Attributes:
+        min_experience (Optional[int]): Minimum years of experience.
+        max_experience (Optional[int]): Maximum years of experience.
     """
     min_experience: Optional[int] = Field(
         default=None,
@@ -111,7 +146,11 @@ class ExperienceSchema(BaseModel):
 
 class EducationSchema(BaseModel):
     """
-    Structured experience requirement in years.
+    Structured education requirement.
+
+    Attributes:
+        min_education (Literal[...]): Minimum required education level.
+        max_education (Optional[Literal[...]]): Maximum education level.
     """
     min_education: Literal[
         "high_school",
@@ -139,6 +178,21 @@ class EducationSchema(BaseModel):
 class JobSchema(BaseModel):
     """
     Core job-related information.
+
+    Attributes:
+        link (HttpUrl): Job posting link.
+        title (Optional[str]): Job title.
+        category (Literal[...]): Job category.
+        employment_type (Optional[Literal[...]): Employment type.
+        work_mode (Optional[Literal[...]): Work mode.
+        experience_required (ExperienceSchema): Structured experience requirement.
+        education_required (EducationSchema): Structured education requirement.
+        posted_at (Optional[str]): Posting date.
+        updated_at (Optional[str]): Last update date.
+        salary (SalarySchema): Structured salary.
+        skills (List[str]): Skills required.
+        description (Optional[str]): Full job description.
+        requirements (List[RequirementSchema]): List of structured requirements.
     """
     link: HttpUrl
     title: Optional[str] = None
@@ -175,6 +229,13 @@ class JobSchema(BaseModel):
 class CompanySchema(BaseModel):
     """
     Company-related metadata.
+
+    Attributes:
+        name (Optional[str]): Company name.
+        industry (Optional[str]): Industry or sector.
+        employee_size (Optional[str]): Number of employees.
+        address (Optional[str]): Company address.
+        about (Optional[str]): Company description.
     """
     name: Optional[str] = None
     industry: Optional[str] = None
@@ -185,7 +246,12 @@ class CompanySchema(BaseModel):
 
 class RecruiterSchema(BaseModel):
     """
-    Recruiter or hiring contact.
+    Recruiter or hiring contact metadata.
+
+    Attributes:
+        name (Optional[str]): Recruiter name.
+        initials (Optional[str]): Recruiter initials.
+        last_active (Optional[str]): Last active timestamp.
     """
     name: Optional[str] = None
     initials: Optional[str] = None
@@ -195,6 +261,12 @@ class RecruiterSchema(BaseModel):
 class ApplicationSchema(BaseModel):
     """
     Application lifecycle metadata.
+
+    Attributes:
+        status (Literal[...]): Current status of the application.
+        applied_at (Optional[str]): Timestamp when applied.
+        deadline (Optional[str]): Application deadline.
+        notes (Optional[str]): Additional notes or comments.
     """
     status: Literal[
         "open",
@@ -212,7 +284,11 @@ class ApplicationSchema(BaseModel):
 
 class SourceSchema(BaseModel):
     """
-    Source metadata of the job posting.
+    Metadata about the source of the job posting.
+
+    Attributes:
+        platform (Optional[str]): Job portal or platform.
+        language (Optional[str]): Language of the posting.
     """
     platform: Optional[str] = None
     language: Optional[str] = None
@@ -221,6 +297,14 @@ class SourceSchema(BaseModel):
 class JobDocumentSchema(BaseModel):
     """
     Aggregated normalized job document (schema v2).
+
+    Attributes:
+        riba (RibaSchema): Riba-related information.
+        job (JobSchema): Core job data.
+        company (CompanySchema): Company metadata.
+        recruiter (RecruiterSchema): Recruiter data.
+        application (ApplicationSchema): Application lifecycle info.
+        source (SourceSchema): Source metadata.
     """
     riba: RibaSchema
     job: JobSchema

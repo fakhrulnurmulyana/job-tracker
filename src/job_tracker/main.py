@@ -20,6 +20,25 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    """
+    Entry point for the job normalization pipeline.
+
+    This function initializes all dependencies required for the
+    JobPipelineService, including the Gemini client, normalizer,
+    file handlers, and path resolver. It prompts the user for a
+    file name and executes the full job pipeline.
+
+    Steps:
+        1. Load Gemini API configuration.
+        2. Initialize LLM client (GeminiClient) and JobNormalizer.
+        3. Set up file handling, splitting, and saving services.
+        4. Prompt user for raw file name.
+        5. Execute the JobPipelineService.process() method to
+           perform full ETL, normalization, and saving of job documents.
+
+    Raises:
+        Exception: Propagates any unhandled exceptions during pipeline execution.
+    """
     config = load_gemini_config()
     base_path = Path.cwd()
 

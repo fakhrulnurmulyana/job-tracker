@@ -3,24 +3,59 @@ from pathlib import Path
 
 class NoStackTraceFilter(logging.Filter):
     """
-    Filter that allows only log records without exception information.
-    Used to keep application logs clean from stack traces.
+    Logging filter that allows only records without exception information.
+
+    This filter is typically applied to application logs to keep
+    normal log messages clean from stack traces.
     """
     def filter(self, record: logging.LogRecord) -> bool:
+        """
+        Determine if a log record should be processed.
+
+        Args:
+            record (logging.LogRecord): The log record to evaluate.
+
+        Returns:
+            bool: True if the record has no exception info, False otherwise.
+        """
         return record.exc_info is None
 
 
 class StackTraceOnlyFilter(logging.Filter):
     """
-    Filter that allows only log records containing exception information.
-    Used to isolate stack traces into a dedicated error log.
+    Logging filter that allows only records containing exception information.
+
+    This filter is used to isolate stack traces into a dedicated error log.
     """
     def filter(self, record: logging.LogRecord) -> bool:
+        """
+        Determine if a log record should be processed.
+
+        Args:
+            record (logging.LogRecord): The log record to evaluate.
+
+        Returns:
+            bool: True if the record contains exception info, False otherwise.
+        """
         return record.exc_info is not None
     
 
 class DebugOnlyFilter(logging.Filter):
+    """
+    Logging filter that allows only DEBUG-level log records.
+
+    Useful for separating verbose debug logs from info or error logs.
+    """
     def filter(self, record: logging.LogRecord) -> bool:
+        """
+        Determine if a log record should be processed.
+
+        Args:
+            record (logging.LogRecord): The log record to evaluate.
+
+        Returns:
+            bool: True if the record level is DEBUG, False otherwise.
+        """
         return record.levelno == logging.DEBUG
     
 
