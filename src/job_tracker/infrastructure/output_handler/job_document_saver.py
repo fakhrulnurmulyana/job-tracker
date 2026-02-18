@@ -16,7 +16,7 @@ class JobDocumentSaver:
     This class handles writing JobDocumentSchema instances
     to JSON files in a human-readable format.
     """
-    def _save(self, doc: JobDocumentSchema, path: Path) -> None:
+    def save(self, doc: JobDocumentSchema, path: Path) -> None:
         """
         Save a single job document to a file in JSON format.
 
@@ -34,25 +34,3 @@ class JobDocumentSaver:
             doc.model_dump_json(indent=2), 
             encoding="utf-8"
         )
-
-    def batch_save(
-        self, 
-        docs: List[JobDocumentSchema], 
-        paths: List[Path],
-    )-> None:
-        """
-        Save multiple job documents to disk.
-
-        Iterates over each job document and its corresponding
-        path, saving each and logging success.
-
-        Args:
-            docs (List[JobDocumentSchema]): List of job documents to save.
-            paths (List[Path]): Corresponding file paths for each document.
-        """
-        for (doc, path) in zip(docs, paths):
-            self._save( doc=doc, path=path)
-            logger.info(
-                    "Job %s successfully extracted",
-                    path,
-                )

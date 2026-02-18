@@ -2,26 +2,34 @@ import logging
 
 from typing import List
 
+from job_tracker.interface import JobNormalizer, PathResolver, JobDocumentSaver
+from job_tracker.infrastructure import file_naming
+
 
 logger = logging.getLogger(__name__)
 
-def job_processor(
-        self, 
-        paths: List[str],
+def job_processor( 
+        prompts: List[str],
+        normalizer: JobNormalizer,
+        paths: PathResolver,
+        saver:JobDocumentSaver,
     ) -> None:
-        job_docs = self.normalizer.batch_normalize(
-            prompts=prompts,
-            data_length=data_length
-        )
-        logger.info("Batch normalization completed.")
+        for prompt in prompts:
+            job_doc = normalizer.normalize(
+                prompt=prompt,
+            )
 
-        outputs_name = batch_file_naming(job_docs)
-        finalized_paths = self.paths.batch_finalized_file(
-            names=outputs_name, 
-            data_length=data_length
-        )
+            logger.info("Batch normalization completed.")
 
-        logger.debug("Final output paths resolved: %s", finalized_paths)
+            output_name = file_naming(job_doc)
 
-        self.saver.batch_save(docs=job_docs, paths=finalized_paths)
-        logger.info("Finalized job documents saved successfully.")
+            finalized_path = paths.finalized_file(name=output_name)
+
+            logger.debug("Final output paths resolved: %s", finalized_path)
+
+            saver.save(doc=job_doc, path=finalized_path)
+
+            logger.info(
+                  "Finalized job %s documents saved successfully.",
+                  output_name
+                  )

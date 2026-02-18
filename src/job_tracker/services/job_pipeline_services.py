@@ -3,18 +3,18 @@ import logging
 from pathlib import Path
 from typing import List, Tuple
 
-from job_tracker.core import (
-    batch_strip_html,
+from job_tracker.core import batch_strip_html
+from job_tracker.infrastructure import LoadingStatus
+from job_tracker.interface import (    
     EditorLauncher,
     FileHandler,
     FileSplitter,
     JobDocumentSaver,
-    JobNormalizerAbcs,
+    JobNormalizer,
     PathResolver,
-    )
-from job_tracker.infrastructure import LoadingStatus, batch_file_naming
+)
 from job_tracker.prompts import build_batch_job_normalization_prompt
-
+from job_tracker.services.job_processor import job_processor
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class JobPipelineService:
         file_splitter: FileSplitter,
         paths: PathResolver,
         saver: JobDocumentSaver,
-        normalizer: JobNormalizerAbcs,
+        normalizer: JobNormalizer,
     ) -> None:
         """
         Initialize the JobPipelineService with all required dependencies.
@@ -165,14 +165,6 @@ class JobPipelineService:
         read_path: List[Path], 
         data_length: int,
     ) -> None:
-        """
-        Normalize cleaned job files into structured JobDocumentSchema objects
-        and persist the results to finalized paths.
-
-        Args:
-            read_path (List[Path]): Paths of cleaned files to normalize.
-            data_length (int): Number of files to normalize.
-        """
         logger.info("Starting normalization for %d cleaned files", data_length)
 
         content = self.file_handler.batch_consume(read_path)
@@ -184,21 +176,13 @@ class JobPipelineService:
         )
         logger.debug("Normalization prompts generated.")
 
-        job_docs = self.normalizer.batch_normalize(
-            prompts=prompts,
-            data_length=data_length
+        job_processor(
+            prompts=prompts, 
+            normalizer=self.normalizer, 
+            paths=self.paths,
+            saver=self.saver,
         )
-        logger.info("Batch normalization completed.")
-
-        outputs_name = batch_file_naming(job_docs)
-        finalized_paths = self.paths.batch_finalized_file(
-            names=outputs_name, 
-            data_length=data_length
-        )
-
-        logger.debug("Final output paths resolved: %s", finalized_paths)
-
-        self.saver.batch_save(docs=job_docs, paths=finalized_paths)
+    
         logger.info("Finalized job documents saved successfully.")
 
 

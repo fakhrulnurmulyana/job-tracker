@@ -4,7 +4,7 @@ import logging
 from typing import List
 
 from job_tracker.schemas import JobDocumentSchema
-from job_tracker.core import LLMClient
+from job_tracker.interface import LLMClient
 
 # Module-level logger for normalization flow
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class JobNormalizer:
         # Inject LLM dependency to keep this class testable and decoupled
         self.client = client
     
-    def _normalize(self, prompt: str) -> JobDocumentSchema:
+    def normalize(self, prompt: str) -> JobDocumentSchema:
         """
         Execute a normalization prompt and validate the structured result.
 
@@ -71,50 +71,3 @@ class JobNormalizer:
         
         logger.info("Job description normalized successfully")
         return result
-    
-    def batch_normalize(self, prompts:List[str], data_length:int)->List[JobDocumentSchema]:
-        """
-        Normalize multiple prompts in batch mode.
-
-        This method validates that the number of prompts matches
-        the expected data length before processing. Each prompt
-        is normalized individually using the internal `_normalize` method.
-
-        Args:
-            prompts (List[str]): List of normalization prompts.
-            data_length (int): Expected number of prompts.
-
-        Returns:
-            List[JobDocumentSchema]: List of validated job documents.
-
-        Raises:
-            ValueError: If the number of prompts does not match data_length.
-            Exception: If any individual normalization fails.
-        """
-        batch_prompt = len(prompts)
-    
-        if batch_prompt != data_length:
-            expected = data_length
-            actual = batch_prompt
-
-            logger.error(
-                "Normalizing text failed — mismatch length (expected=%d, actual=%d)",
-                expected,
-                actual,
-            )
-
-            raise ValueError(
-                f"Prompts length mismatch (expected={expected}, actual={actual})"
-            )
-        
-        results = []
-        
-        for prompt in prompts:
-            try:
-                result =  self._normalize(prompt)
-                results.append(result)
-            except Exception as e:
-                logger.exception("Batch normalization filed!")
-                raise
-        
-        return results

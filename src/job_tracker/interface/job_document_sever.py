@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from job_tracker.schemas import JobDocumentSchema
 from pathlib import Path
-from typing import List
 
 class JobDocumentSaver(ABC):
     """
@@ -11,8 +10,8 @@ class JobDocumentSaver(ABC):
     @abstractmethod
     def batch_save(
         self, 
-        docs: List[JobDocumentSchema], 
-        paths: List[Path],
+        doc: JobDocumentSchema, 
+        path: Path,
     )-> None:
         """
         Save multiple job documents in batch.

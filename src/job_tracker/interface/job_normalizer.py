@@ -3,13 +3,13 @@ from job_tracker.schemas import JobDocumentSchema
 from typing import List
 
 
-class JobNormalizerAbcs(ABC):
+class JobNormalizer(ABC):
     """
     Abstract base class for job document normalization.
     """
 
     @abstractmethod
-    def batch_normalize(self, prompts:List[str])->List[JobDocumentSchema]:
+    def normalize(self, prompt:str)->List[JobDocumentSchema]:
         """
         Normalize a batch of prompts into structured job documents.
 

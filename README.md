@@ -10,17 +10,18 @@ This project demonstrates:
 * Practical LLM integration for real-world data workflows
 
 > ⚠️ **Project Status**: Active development.
-> Current version: **v2.0.0**
+> Current version: **v2.1.0**
 
 ---
 
-# What's New in v2.0.0
+# What's New in v2.1.0
 
 This version introduces significant architectural improvements and new features:
 
-## Architectural Improvements
+## Updated Improvement Notes
 
 * Refactored folder structure with clearer separation of responsibilities
+* Introduced **incremental processing & persistence** (each job is saved immediately after completion to prevent total batch failure)
 * Dedicated **pipeline module** for orchestration logic
 * Entry point fully decoupled from business logic
 * Added additional **type hints** for better readability and maintainability
@@ -32,13 +33,6 @@ This version introduces significant architectural improvements and new features:
   * persistence
   * services
   * prompts
-
-This makes the system more:
-
-* Testable
-* Extensible
-* Maintainable
-* Replaceable (LLM provider, storage, UI layer)
 
 ---
 
@@ -133,52 +127,67 @@ Logs are excluded from version control.
 
 ---
 
-# Project Structure (v2.0.0)
+# Project Structure (v2.1.0)
 
 ```
 JOB_TRACKER/
 │
-├── data/                      # Runtime data (generated files, exports, etc.)
-├── logs/                      # Application logs
+├── data/
+│   ├── cleaned/
+│   ├── finalized/
+│   ├── raw/
+│   └── split/
+│
+├── logs/
+│   ├── app.log
+│   ├── debug.log
+│   └── error.log
 │
 ├── src/
 │   └── job_tracker/
 │       │
-│       ├── core/              # Pure business logic (domain layer)
+│       ├── core/
+│       │   ├── __init__.py
 │       │   ├── job_normalizer.py
 │       │   └── text_cleaner.py
 │       │
-│       ├── schemas/           # Data contracts / validation models
-│       │   └── job_schema.py
-│       │
-│       ├── services/          # Application services
-│       │   ├── job_pipeline_services.py
-│       │   └── gemini_client.py
-│       │
-│       ├── infrastructure/    # Technical implementations
-│       │   ├── cli.py
-│       │   ├── editor.py
-│       │   ├── file_naming.py
-│       │   ├── file_splitter.py
+│       ├── infrastructure/
 │       │   ├── files_handler.py
 │       │   ├── loading.py
 │       │   └── path.py
 │       │
-│       ├── persistence/       # Data storage logic
-│       │   └── job_document.py
+│       ├── interface/
+│       │   ├── __init__.py
+│       │   ├── editor_launcher.py
+│       │   ├── file_handler.py
+│       │   ├── file_naming.py
+│       │   ├── file_split.py
+│       │   ├── job_document_server.py
+│       │   ├── job_normalizer.py
+│       │   ├── llm_client.py
+│       │   └── path_resolver.py
 │       │
-│       ├── prompts/           # LLM prompt templates
+│       ├── prompts/
+│       │   ├── __init__.py
 │       │   └── job_normalization.py
 │       │
+│       ├── schemas/
+│       │   ├── __init__.py
+│       │   └── job_schema.py
+│       │
+│       ├── services/
+│       │   ├── __init__.py
+│       │   ├── gemini_client.py
+│       │   ├── job_pipeline_services.py
+│       │   └── job_processor.py
+│       │
+│       ├── __init__.py
 │       ├── logging_config.py
-│       ├── settings.py
-│       └── main.py
-│
-├── tests/
+│       ├── main.py
+│       └── settings.py
 │
 ├── .env
 ├── .env.example
-├── .env.test
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -258,7 +267,7 @@ python -m job_tracker.main
 
 ---
 
-# Application Flow (v2.0.0)
+# Application Flow (v2.1.0)
 
 1. User provides file name
 2. Local editor opens

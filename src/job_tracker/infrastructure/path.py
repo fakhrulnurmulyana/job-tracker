@@ -171,34 +171,11 @@ class PathResolver:
 
         return all_cleaned_path
     
-    def batch_finalized_file(
+    def finalized_file(
         self, 
-        names: list[str], 
-        data_length: int,
+        name: list[str], 
         suffix: str = ".json",
     )->List[Path]:
-        """
-        Resolve paths for a batch of finalized files.
-
-        Args:
-            names (list[str]): List of file base names.
-            data_length (int): Number of files in the batch.
-            suffix (str): File extension (default: ".json").
-
-        Returns:
-            List[Path]: List of paths for finalized files.
-
-        Raises:
-            ValueError: If names is empty or data_length <= 0.
-        """
-        self._validate_batch_input(        
-            name=names, 
-            data_length=data_length,
-        )
-
         default_path = self.finalized_dir
 
-        return [
-            default_path / f"{name}{suffix}"
-            for name in names
-        ]
+        return default_path / f"{name}{suffix}"
