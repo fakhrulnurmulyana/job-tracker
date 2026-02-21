@@ -23,9 +23,8 @@ class PathResolver:
 
         # Define raw and processed data directories
         self.raw_dir = self.data_path / "raw"
-        self.cleaned_dir = self.data_path / "cleaned"
-        self.split_dir = self.data_path / "split"
         self.finalized_dir = self.data_path / "finalized"
+        self.output_llm_dir = self.data_path / "output_llm"
 
         self._ensure_directories()
 
@@ -37,9 +36,8 @@ class PathResolver:
         if they do not already exist.
         """
         self.raw_dir.mkdir(parents=True, exist_ok=True)
-        self.cleaned_dir.mkdir(parents=True, exist_ok=True)
-        self.split_dir.mkdir(parents=True, exist_ok=True)
         self.finalized_dir.mkdir(parents=True, exist_ok=True)
+        self.output_llm_dir.mkdir(parents=True, exist_ok=True)
 
     def raw_file(self, name: str, suffix: str = ".txt") -> Path:
         """
@@ -62,10 +60,20 @@ class PathResolver:
     
     def finalized_file(
         self, 
-        name: list[str], 
+        name: List[str], 
         input_fname: str,
         suffix: str = ".json",
-    )->List[Path]:
+    )-> Path:
         default_path = self.finalized_dir
 
         return default_path / input_fname / f"{name}{suffix}"
+    
+    def output_llm_file(
+        self,
+        name: List[str],
+        input_fname: str,
+        suffix: str = ".json",
+    )-> Path:
+        default_path = self.output_llm_dir
+
+        return default_path / input_fname / f"temp_{name}{suffix}" 

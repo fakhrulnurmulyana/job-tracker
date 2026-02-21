@@ -1,71 +1,112 @@
 import logging
 
-from typing import List
+from typing import List, Dict, Any
 
+from job_tracker.core import job_validator
 from job_tracker.interface import JobNormalizer, PathResolver, JobDocumentSaver
-from job_tracker.infrastructure import file_naming
+from job_tracker.infrastructure import file_naming, FileHandler
 
 
 logger = logging.getLogger(__name__)
 
 def job_processor( 
     prompts: List[str],
-    normalizer: JobNormalizer,
+    normalizer: JobNormalizer, 
     paths: PathResolver,
     saver:JobDocumentSaver,
     input_fname: str,
 ) -> None:
     """
-    Process a batch of raw job prompts into finalized structured documents.
+    Process a batch of job prompts into validated and persisted job documents.
 
-    This function orchestrates the end-to-end pipeline:
-    1. Normalize raw job text into a structured job document.
-    2. Generate a standardized output filename.
-    3. Resolve the finalized output path.
-    4. Persist the structured document to storage.
+    This function orchestrates the normalization pipeline:
 
-    Parameters
-    ----------
-    prompts : List[str]
-        A collection of raw job vacancy texts to be processed.
-    normalizer : JobNormalizer
-        Service responsible for transforming raw text into
-        a validated structured job document.
-    paths : PathResolver
-        Service responsible for resolving filesystem paths
-        for finalized job documents.
-    saver : JobDocumentSaver
-        Service responsible for persisting job documents
-        to the resolved storage location.
+        1. Normalize raw job text using the LLM normalizer.
+        2. Generate a standardized output filename.
+        3. Persist raw LLM output for traceability.
+        4. Validate normalized data against JobDocumentSchema.
+        5. Resolve finalized output path.
+        6. Save validated job document.
 
-    Returns
-    -------
-    None
-        This function performs side effects (normalization and file saving)
-        and does not return any value.
+    Args:
+        prompts (List[str]):
+            Collection of raw job vacancy texts to process.
+        normalizer (JobNormalizer):
+            Service responsible for transforming raw text into
+            structured JSON output produced by the LLM.
+        paths (PathResolver):
+            Service responsible for resolving filesystem paths.
+        saver (JobDocumentSaver):
+            Service responsible for persisting validated job documents.
+        input_fname (str):
+            Base filename used for grouping generated outputs.
 
-    Notes
-    -----
-    - Logging is used to track processing progress and output resolution.
-    - Any exception handling is expected to be managed by the caller
-    or the underlying service implementations.
+    Returns:
+        None:
+            This function performs side effects only (file writing
+            and persistence).
+
+    Raises:
+        Exception:
+            Propagates exceptions raised by normalization,
+            validation, or persistence layers.
+
+    Notes:
+        - Raw LLM outputs are stored before validation for auditing
+          and debugging purposes.
+        - Logging provides visibility into batch progress and
+          output resolution.
     """
-    for prompt in prompts:
-        job_doc = normalizer.normalize(
+    logger.info(
+        "Starting job processing batch (total_prompts=%d, input=%s)",
+        len(prompts),
+        input_fname,
+    )
+
+    for index, prompt in enumerate(prompts, start=1):
+        logger.debug("Processing prompt %d/%d", index, len(prompts))
+
+        job_doc: Dict[str, Any] = normalizer.normalize(
             prompt=prompt,
         )
 
-        logger.info("Batch normalization completed.")
+        logger.debug("Normalization completed for prompt %d", index)
 
         output_name = file_naming(job_doc)
+        logger.debug("Generated output name: %s", output_name)
 
-        finalized_path = paths.finalized_file(name=output_name, input_fname = input_fname)
+        output_llm_path = paths.output_llm_file(
+            name=output_name,
+            input_fname=input_fname,
+        )
 
-        logger.debug("Final output paths resolved: %s", finalized_path)
+        logger.debug("Resolved LLM output path: %s", output_llm_path)
 
-        saver.save(doc=job_doc, path=finalized_path)
+        FileHandler.write(
+            path=output_llm_path,
+            content=job_doc,
+        )
+
+        logger.debug("Raw LLM output written to disk")
+
+        validate_job_doc = job_validator(
+            data=job_doc
+        )
+
+        logger.info("Schema validation completed for '%s'", output_name)
+
+        finalized_path = paths.finalized_file(
+            name=output_name,
+            input_fname=input_fname,
+        )
+
+        logger.debug("Final output path resolved: %s", finalized_path)
+
+        saver.save(doc=validate_job_doc, path=finalized_path)
 
         logger.info(
-                "Finalized job %s documents saved successfully.",
-                output_name
-                )
+            "Finalized job document '%s' saved successfully",
+            output_name,
+        )
+
+    logger.info("Job processing batch completed successfully")
