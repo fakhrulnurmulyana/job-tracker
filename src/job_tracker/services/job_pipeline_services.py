@@ -89,7 +89,7 @@ class JobPipelineService:
             read_path (Path): Path of the raw file to split.
 
         Returns:
-            Tuple[List[str], int]: List of split data and number of segments.
+            List[str]
         """
 
         logger.info("Splitting file: %s", read_path)
@@ -108,7 +108,6 @@ class JobPipelineService:
 
         Args:
             contents (List[str]): data to clean.
-            data_length (int): Number of files to process.
 
         Returns:
             List[str]: List of cleaned data.
@@ -134,9 +133,6 @@ class JobPipelineService:
         Args:
             contents (List[str]):
                 List of cleaned text contents to be normalized.
-            data_length (int):
-                Total number of content items to process. Used for
-                validation and prompt construction.
             input_fname (str):
                 Base filename identifier used for output generation
                 and saving processed documents.
@@ -196,13 +192,12 @@ class JobPipelineService:
         try:
             raw_path = self.initiate_file(file_name=file_name)
 
-            split_data, length_data_split = self.split_content(
+            split_data = self.split_content(
                 read_path=raw_path
             )
 
             cleaned_data = self.cleaned_content(
                 contents=split_data,
-                data_length=length_data_split,
             )
 
             api_loader.start()
@@ -210,7 +205,6 @@ class JobPipelineService:
 
             self.normalize_content(
                 contents=cleaned_data,
-                data_length=length_data_split,
                 input_fname=file_name,
             )
 
