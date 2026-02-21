@@ -1,6 +1,6 @@
 import logging
 
-from pathlib import Path
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ class FileSplitter:
     This class separates multiple job descriptions contained
     in a single text block using a predefined delimiter.
     """
-    def split(self, data:str)->tuple:
+    def split(self, data:str)->List[str]:
         """
         Split raw text into individual job segments.
 
@@ -23,14 +23,27 @@ class FileSplitter:
             data (str): Raw text containing one or more job entries.
 
         Returns:
-            tuple: A tuple containing:
-                - list[str]: List of cleaned job segments.
-                - int: Total number of extracted job segments.
+            List[str]
         """
+        logger.debug("Starting file split operation.")
+
+        if not data:
+            logger.warning("Received empty data for splitting.")
+            return []
+
+        logger.debug(
+            "Splitting data using delimiter '%s' (input size=%d chars)",
+            self.DELIMITER,
+            len(data),
+        )
+
         split_data = [
             job.strip()
             for job in data.split("==JOB==")
             if job.strip()
         ]
-        length_data_split = len(split_data)
-        return split_data, length_data_split
+
+        logger.info("File successfully split into %d job segments.", len(split_data))
+        logger.debug("File split operation completed.")
+        
+        return split_data

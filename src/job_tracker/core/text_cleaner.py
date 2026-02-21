@@ -39,7 +39,7 @@ def _strip_html(html: str) -> str:
         raise
 
 
-def batch_strip_html(batch_html: List[str], data_length: int) -> List[str]:
+def batch_strip_html(batch_html: List[str]) -> List[str]:
     """
     Clean multiple HTML strings in batch mode.
 
@@ -49,7 +49,6 @@ def batch_strip_html(batch_html: List[str], data_length: int) -> List[str]:
 
     Args:
         batch_html (List[str]): List of raw HTML strings.
-        data_length (int): Expected number of HTML items.
 
     Returns:
         List[str]: List of cleaned and lowercase text strings.
@@ -58,23 +57,17 @@ def batch_strip_html(batch_html: List[str], data_length: int) -> List[str]:
         ValueError: If batch_html length does not match data_length.
         Exception: If any individual HTML cleaning fails.
     """
-    batch_html_length =len(batch_html)
 
-    if batch_html_length != data_length:
-      expected = data_length
-      actual = batch_html_length
+    total_items = len(batch_html)
 
-      logger.error(
-          "Cleaning text failed — mismatch length (expected=%d, actual=%d)",
-          expected,
-          actual,
-      )
+    logger.info(
+        "Starting batch HTML cleaning | total_items=%d",
+        total_items,
+    )
 
-      raise ValueError(
-          f"Batch HTML length mismatch (expected={expected}, actual={actual})"
-      )
-
-    logger.info("Starting batch HTML cleaning. Total items=%s", data_length)
+    if not batch_html:
+        logger.warning("Received empty batch_html. Nothing to process.")
+        return []
 
     results: List[str] = []
 

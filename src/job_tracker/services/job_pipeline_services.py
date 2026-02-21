@@ -78,10 +78,10 @@ class JobPipelineService:
         return raw_path
 
 
-    def split_file(
+    def split_content(
         self,
         read_path: Path,
-    ) -> Tuple[List[str], int]:
+    ) -> List[str]:
         """
         Split raw job file into multiple segments.
 
@@ -97,15 +97,11 @@ class JobPipelineService:
         content = self.file_handler.consume(read_path)
         logger.debug("File consumed successfully: %s", read_path)
 
-        split_data, length_data_split = self.file_splitter.split(data=content)
-        logger.info("File split into %d segments", length_data_split)
+        return self.file_splitter.split(data=content)
 
-        return split_data, length_data_split
-
-    def cleaned_file(
+    def cleaned_content(
         self,
         contents: List[str],
-        data_length: int,
     ) -> List[str]:
         """
         Clean HTML content from split files and write cleaned files.
@@ -118,17 +114,13 @@ class JobPipelineService:
             List[str]: List of cleaned data.
         """
 
-        logger.info("Cleaning %d split files", data_length)
+        logger.info("Cleaning %d split files", len(contents))
 
-        return batch_strip_html(
-            batch_html=contents,
-            data_length=data_length
-        )
+        return batch_strip_html(batch_html=contents)
 
-    def normalize(
+    def normalize_content(
         self, 
         contents: List[str],
-        data_length: int,
         input_fname: str,
     ) -> None:
         """
@@ -162,11 +154,10 @@ class JobPipelineService:
                 Propagates exceptions raised during prompt generation
                 or job processing.
         """
-        logger.info("Starting normalization for %d cleaned files", data_length)
+        logger.info("Starting normalization for %d cleaned files", len(contents))
 
         prompts = build_batch_job_normalization_prompt(
-            raw_text_list=contents,
-            data_length=data_length
+            raw_text_list=contents
         )
         logger.debug("Normalization prompts generated.")
 
@@ -205,11 +196,11 @@ class JobPipelineService:
         try:
             raw_path = self.initiate_file(file_name=file_name)
 
-            split_data, length_data_split = self.split_file(
+            split_data, length_data_split = self.split_content(
                 read_path=raw_path
             )
 
-            cleaned_data = self.cleaned_file(
+            cleaned_data = self.cleaned_content(
                 contents=split_data,
                 data_length=length_data_split,
             )
@@ -217,7 +208,7 @@ class JobPipelineService:
             api_loader.start()
             logger.debug("LoadingStatus started.")
 
-            self.normalize(
+            self.normalize_content(
                 contents=cleaned_data,
                 data_length=length_data_split,
                 input_fname=file_name,

@@ -238,44 +238,36 @@ INPUT:
 
 def build_batch_job_normalization_prompt(
       raw_text_list: List[str], 
-      data_length:int,
     ) -> List[str]:
     """
     Generate a batch of job normalization prompts from raw texts.
 
     Args:
         raw_text_list (List[str]): List of raw job vacancy texts.
-        data_length (int): Expected number of items in the batch.
 
     Returns:
         List[str]: List of formatted prompts for each raw text.
-
-    Raises:
-        ValueError: If the length of raw_text_list does not match data_length.
 
     Notes:
         Each prompt is built using `_build_job_normalization_prompt`,
         ensuring consistency and strict JSON schema enforcement.
     """
-    batch_raw_text_length = len(raw_text_list)
-    
-    if batch_raw_text_length != data_length:
-      expected = data_length
-      actual = batch_raw_text_length
+    logger.debug("Starting batch prompt generation.")
 
-      logger.error(
-          "Generate prompts failed — mismatch length (expected=%d, actual=%d)",
-          expected,
-          actual,
-      )
+    if not raw_text_list:
+        logger.warning("Received empty raw_text_list for prompt generation.")
+        return []
 
-      raise ValueError(
-          f"Batch text length mismatch (expected={expected}, actual={actual})"
-      )
-    
-    prompts=list()
+    total_items = len(raw_text_list)
+    logger.info("Generating normalization prompts for %d items.", total_items)
+
+    prompts: List[str] = []
     
     for raw_text in raw_text_list:
         prompt = _build_job_normalization_prompt(raw_text=raw_text)
         prompts.append(prompt)
+
+    logger.info("Successfully generated %d normalization prompts.", len(prompts))
+    logger.debug("Batch prompt generation completed.")
+    
     return prompts
