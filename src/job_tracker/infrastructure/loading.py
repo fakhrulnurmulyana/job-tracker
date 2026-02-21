@@ -20,19 +20,17 @@ class LoadingStatus:
         self._stop = threading.Event()
 
     def _run(self):
-        """
-        Execute the loading animation loop.
-
-        This method runs in a separate thread and continuously
-        updates the console output until the stop event is set.
-        """
         dots = ""
         while not self._stop.is_set():
             dots = "." if dots == "..." else dots + "."
-            sys.stdout.write(f'\r{self.text}{dots}')
+
+            sys.stdout.write("\r\033[K")  # clear line
+            sys.stdout.write(f"{self.text}{dots}")
             sys.stdout.flush()
+
             time.sleep(0.5)
-        sys.stdout.write('\r')
+
+        sys.stdout.write("\r\033[K")
 
     def start(self):
         """
