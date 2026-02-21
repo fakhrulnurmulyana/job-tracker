@@ -12,7 +12,7 @@ from job_tracker.infrastructure import (
     JobDocumentSaver,
     EditorLauncher,
     PathResolver,
-    silent_input,
+    input_fname,
 )
 
 
@@ -58,7 +58,7 @@ def main() -> None:
         normalizer=normalizer,
     )
 
-    file_name = silent_input("Write name for the file: ")
+    file_name = input_fname()
 
     pipeline.process(file_name)
 

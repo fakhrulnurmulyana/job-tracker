@@ -1,19 +1,18 @@
-from .cli import silent_input
 from .editor import EditorLauncher
 from .files_handler import FileHandler
-from .file_naming import file_naming
+from .file_naming import input_fname, output_fname
 from .job_document_saver import JobDocumentSaver
 from .file_splitter import FileSplitter
 from .loading import LoadingStatus
 from .path import PathResolver
 
 __all__=[
-    "file_naming",
+    "input_fname",
+    "output_fname",
     "EditorLauncher",
     "JobDocumentSaver",
     "FileHandler",
     "FileSplitter",
     "LoadingStatus",
-    "PathResolver",
-    "silent_input"
+    "PathResolver"
 ]
