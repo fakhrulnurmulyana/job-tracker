@@ -80,18 +80,16 @@ class JobPipelineService:
 
     def split_file(
         self,
-        file_name: str,
         read_path: Path,
-    ) -> Tuple[List[Path], int]:
+    ) -> Tuple[List[str], int]:
         """
         Split raw job file into multiple segments.
 
         Args:
-            file_name (str): Base filename for segments.
             read_path (Path): Path of the raw file to split.
 
         Returns:
-            Tuple[List[Path], int]: List of split file paths and number of segments.
+            Tuple[List[str], int]: List of split data and number of segments.
         """
 
         logger.info("Splitting file: %s", read_path)
@@ -102,77 +100,72 @@ class JobPipelineService:
         split_data, length_data_split = self.file_splitter.split(data=content)
         logger.info("File split into %d segments", length_data_split)
 
-        split_path = self.paths.split_path(
-            name=file_name,
-            data_length=length_data_split
-        )
-        logger.debug("Generated split paths: %s", split_path)
-
-        self.file_handler.write_batch(
-            paths=split_path,
-            contents=split_data,
-        )
-        logger.debug("Split files written successfully.")
-
-        return split_path, length_data_split
+        return split_data, length_data_split
 
     def cleaned_file(
         self,
-        file_name: List[str],
-        read_path: List[Path],
+        contents: List[str],
         data_length: int,
-    ) -> Tuple[List[Path], int]:
+    ) -> List[str]:
         """
         Clean HTML content from split files and write cleaned files.
 
         Args:
-            file_name (List[str]): Base filenames for cleaned files.
-            read_path (List[Path]): Paths of split files to clean.
+            contents (List[str]): data to clean.
             data_length (int): Number of files to process.
 
         Returns:
-            Tuple[List[Path], int]: List of cleaned file paths and number of files.
+            List[str]: List of cleaned data.
         """
 
         logger.info("Cleaning %d split files", data_length)
 
-        content = self.file_handler.batch_consume(read_path)
-        logger.debug("Batch file consume completed.")
-
-        cleaned_data = batch_strip_html(
-            batch_html=content,
+        return batch_strip_html(
+            batch_html=contents,
             data_length=data_length
         )
-        logger.debug("HTML stripping completed.")
-
-        cleaned_path = self.paths.batch_cleaned_file(
-            name=file_name,
-            data_length=data_length
-        )
-        logger.debug("Resolved cleaned file paths: %s", cleaned_path)
-
-        self.file_handler.write_batch(
-            paths=cleaned_path,
-            contents=cleaned_data
-        )
-        logger.info("Cleaned files successfully written.")
-
-        return cleaned_path, data_length
-
 
     def normalize(
         self, 
-        read_path: List[Path], 
+        contents: List[str],
         data_length: int,
         input_fname: str,
     ) -> None:
+        """
+        Normalize cleaned text contents into structured job documents.
+
+        This method generates normalization prompts from preprocessed
+        text data and executes the batch normalization pipeline using
+        the configured normalizer. The resulting structured job
+        documents are persisted through the configured saver component.
+
+        Args:
+            contents (List[str]):
+                List of cleaned text contents to be normalized.
+            data_length (int):
+                Total number of content items to process. Used for
+                validation and prompt construction.
+            input_fname (str):
+                Base filename identifier used for output generation
+                and saving processed documents.
+
+        Returns:
+            None
+
+        Side Effects:
+            - Generates normalization prompts.
+            - Executes batch processing via ``job_processor``.
+            - Saves normalized job documents to storage.
+
+        Raises:
+            Exception:
+                Propagates exceptions raised during prompt generation
+                or job processing.
+        """
         logger.info("Starting normalization for %d cleaned files", data_length)
 
-        content = self.file_handler.batch_consume(read_path)
-        logger.debug("Batch consume completed for normalization.")
-
         prompts = build_batch_job_normalization_prompt(
-            raw_text_list=content,
+            raw_text_list=contents,
             data_length=data_length
         )
         logger.debug("Normalization prompts generated.")
@@ -212,14 +205,12 @@ class JobPipelineService:
         try:
             raw_path = self.initiate_file(file_name=file_name)
 
-            split_path, length_data_split = self.split_file(
-                file_name=file_name,
+            split_data, length_data_split = self.split_file(
                 read_path=raw_path
             )
 
-            cleaned_path, _ = self.cleaned_file(
-                file_name=file_name,
-                read_path=split_path,
+            cleaned_data = self.cleaned_file(
+                contents=split_data,
                 data_length=length_data_split,
             )
 
@@ -227,7 +218,7 @@ class JobPipelineService:
             logger.debug("LoadingStatus started.")
 
             self.normalize(
-                read_path=cleaned_path,
+                contents=cleaned_data,
                 data_length=length_data_split,
                 input_fname=file_name,
             )

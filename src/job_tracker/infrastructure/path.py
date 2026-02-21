@@ -41,51 +41,6 @@ class PathResolver:
         self.split_dir.mkdir(parents=True, exist_ok=True)
         self.finalized_dir.mkdir(parents=True, exist_ok=True)
 
-    def _validate_batch_input(
-        self,
-        name: str,
-        data_length: int,
-    ) -> None:
-        """
-        Validate batch input parameters for non-empty name and positive length.
-
-        Args:
-            name (str): Base name for files.
-            data_length (int): Number of files expected.
-
-        Raises:
-            ValueError: If name is empty or data_length is not positive.
-        """
-        if name == "":
-            raise ValueError("File name must not be empty")
-
-        if data_length <= 0:
-            raise ValueError("data_length must be greater than 0")
-
-    def _batch_file(
-        self, 
-        name: str, 
-        data_length: int,
-        default_path: Path, 
-        suffix: str = ".txt",
-    ) -> List[Path]:
-        """
-        Generate a batch of file paths in a specified directory.
-
-        Args:
-            name (str): Base name for files.
-            data_length (int): Number of files to generate.
-            default_path (Path): Directory in which to place the files.
-            suffix (str): File extension (default: ".txt").
-
-        Returns:
-            List[Path]: List of file paths for the batch.
-        """
-        return [
-            default_path / f"{name}{i}{suffix}"
-            for i in range(data_length)
-        ]
-
     def raw_file(self, name: str, suffix: str = ".txt") -> Path:
         """
         Resolve path for a single raw input file.
@@ -104,72 +59,6 @@ class PathResolver:
             raise ValueError("File name must not be empty")
         
         return self.raw_dir / f"{name}{suffix}"
-    
-    def batch_cleaned_file(
-        self, 
-        name: str, 
-        data_length: int,
-        suffix: str = ".txt",
-    )->List[Path]:
-        """
-        Resolve paths for a batch of cleaned files.
-
-        Args:
-            name (str): Base name for the batch.
-            data_length (int): Number of files in the batch.
-            suffix (str): File extension (default: ".txt").
-
-        Returns:
-            List[Path]: List of paths for cleaned files.
-        """
-        self._validate_batch_input(        
-            name=name, 
-            data_length=data_length,
-        )
-
-        default_path = self.cleaned_dir
-
-        all_cleaned_path = self._batch_file(
-        name=name, 
-        data_length=data_length,
-        default_path=default_path, 
-        suffix=suffix,
-        )
-
-        return all_cleaned_path
-    
-    def split_path(
-        self, 
-        name: str, 
-        data_length: int,
-        suffix: str = ".txt",
-    )->List[Path]:
-        """
-        Resolve paths for a batch of split files.
-
-        Args:
-            name (str): Base name for the batch.
-            data_length (int): Number of files in the batch.
-            suffix (str): File extension (default: ".txt").
-
-        Returns:
-            List[Path]: List of paths for split files.
-        """
-        self._validate_batch_input(        
-            name=name, 
-            data_length=data_length,
-        )
-                
-        default_path = self.split_dir
-        
-        all_cleaned_path = self._batch_file(
-        name=name, 
-        data_length=data_length,
-        default_path=default_path, 
-        suffix=suffix,
-        )
-
-        return all_cleaned_path
     
     def finalized_file(
         self, 
