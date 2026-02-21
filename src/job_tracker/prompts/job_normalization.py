@@ -50,6 +50,11 @@ GENERAL RULES:
 - Use lowercase letters only for all string values
 - If salary min or max is not null, displayed MUST be true
 
+COMPANY NORMALIZATION RULES:
+- Company names must contain only lowercase letters and spaces.
+- Remove company prefixes such as: pt, cv, inc, ltd, corp, co., tbk.
+- Do not include numbers in company names.
+
 SALARY NORMALIZATION RULES:
 - Salary values MUST be numeric integers only
 - Do NOT include symbols, separators, or decimals
