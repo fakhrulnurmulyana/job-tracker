@@ -1,7 +1,8 @@
 from .cli import silent_input
 from .editor import EditorLauncher
 from .files_handler import FileHandler
-from .output_handler import file_naming, JobDocumentSaver
+from .file_naming import file_naming
+from .job_document_saver import JobDocumentSaver
 from .file_splitter import FileSplitter
 from .loading import LoadingStatus
 from .path import PathResolver

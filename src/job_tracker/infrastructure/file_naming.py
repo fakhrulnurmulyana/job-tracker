@@ -1,5 +1,3 @@
-from typing import List
-
 from job_tracker.schemas import JobDocumentSchema
 
 def file_naming(doc:JobDocumentSchema)-> str:
