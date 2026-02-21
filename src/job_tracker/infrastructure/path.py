@@ -174,8 +174,9 @@ class PathResolver:
     def finalized_file(
         self, 
         name: list[str], 
+        input_fname: str,
         suffix: str = ".json",
     )->List[Path]:
         default_path = self.finalized_dir
 
-        return default_path / f"{name}{suffix}"
+        return default_path / input_fname / f"{name}{suffix}"

@@ -13,6 +13,7 @@ def job_processor(
     normalizer: JobNormalizer,
     paths: PathResolver,
     saver:JobDocumentSaver,
+    input_fname: str,
 ) -> None:
     """
     Process a batch of raw job prompts into finalized structured documents.
@@ -58,7 +59,7 @@ def job_processor(
 
         output_name = file_naming(job_doc)
 
-        finalized_path = paths.finalized_file(name=output_name)
+        finalized_path = paths.finalized_file(name=output_name, input_fname = input_fname)
 
         logger.debug("Final output paths resolved: %s", finalized_path)
 

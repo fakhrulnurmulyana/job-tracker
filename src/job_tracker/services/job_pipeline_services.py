@@ -164,6 +164,7 @@ class JobPipelineService:
         self, 
         read_path: List[Path], 
         data_length: int,
+        input_fname: str,
     ) -> None:
         logger.info("Starting normalization for %d cleaned files", data_length)
 
@@ -181,12 +182,16 @@ class JobPipelineService:
             normalizer=self.normalizer, 
             paths=self.paths,
             saver=self.saver,
+            input_fname= input_fname
         )
     
         logger.info("Finalized job documents saved successfully.")
 
 
-    def process(self, file_name: str) -> None:
+    def process(
+        self, 
+        file_name: str, 
+    ) -> None:
         """
         Execute the full job extraction pipeline: create, split, clean,
         normalize, and save job data, with loading status and error handling.
@@ -223,7 +228,8 @@ class JobPipelineService:
 
             self.normalize(
                 read_path=cleaned_path,
-                data_length=length_data_split
+                data_length=length_data_split,
+                input_fname=file_name,
             )
 
             success = True
