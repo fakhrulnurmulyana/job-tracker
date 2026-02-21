@@ -16,5 +16,5 @@ def file_naming(doc:JobDocumentSchema)-> str:
     Returns:
         str: Generated file name string.
     """
-    output_name = f"{doc.job.category}_{doc.company.name}"
+    output_name = f"{doc.job.title}_{doc.company.name}"
     return output_name
