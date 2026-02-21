@@ -9,14 +9,26 @@ This project demonstrates:
 * Strong separation of concerns
 * Practical LLM integration for real-world data workflows
 
-> ⚠️ **Project Status**: Active development.
-> Current version: **v2.1.0**
+> ⚠️ **Project Status**: Active development  
+> Current version: **v2.1.1**
 
 ---
 
-# What's New in v2.1.0
+# What's New in v2.1.1
 
-This version introduces significant architectural improvements and new features:
+This release introduces minor improvements focused on output consistency and developer experience.
+
+## Improvements
+
+* Output JSON filenames now use the **job position** directly instead of analyzed job categories
+* Improved output naming consistency for easier identification and tracking
+* Minor internal refinements and cleanup
+
+---
+
+# Previous Updates (v2.1.0)
+
+This version introduced significant architectural improvements and new features:
 
 ## Updated Improvement Notes
 
