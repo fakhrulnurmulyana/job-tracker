@@ -84,26 +84,6 @@ class FileHandler:
             self._delete(path)
             raise ValueError(f"File content must not be empty: {path}")
 
-    def _batch_enforce_non_empty(
-        self,
-        contents: List[str],
-        paths: List[Path],
-    ) -> None:
-        """
-        Validate non-empty content for multiple files.
-
-        Args:
-            contents (List[str]): List of file contents.
-            paths (List[Path]): Corresponding file paths.
-
-        Raises:
-            ValueError: If any content is empty.
-        """
-        logger.debug("Validating batch non-empty content (%d files)", len(paths))
-
-        for path, content in zip(paths, contents):
-            self._enforce_non_empty(content=content, path=path)
-
     def _read(self, path: Path) -> str:
         """
         Read file content as UTF-8 text.
@@ -126,33 +106,6 @@ class FileHandler:
         except OSError:
             logger.exception("File read failed: %s", path)
             raise
-
-    def _read_batch(self, paths: List[Path]) -> List[str]:
-        """
-        Read multiple files in batch mode.
-
-        Args:
-            paths (List[Path]): List of file paths.
-
-        Returns:
-            List[str]: List of file contents.
-
-        Raises:
-            ValueError: If paths list is empty.
-            OSError: If any file read fails.
-        """
-        if not paths:
-            logger.error("Read batch failed — empty path list provided")
-            raise ValueError("paths must not be empty")
-
-        logger.info("Reading batch of %d files", len(paths))
-
-        contents = []
-        for path in paths:
-            contents.append(self._read(path=path))
-
-        logger.info("Batch read completed (%d files)", len(contents))
-        return contents
 
     def write(
         self,
@@ -198,40 +151,6 @@ class FileHandler:
             logger.exception("File write failed: %s", path)
             raise
 
-    def write_batch(
-        self,
-        paths: List[Path],
-        contents: List[str],
-    ) -> None:
-        """
-        Write multiple files in batch mode.
-
-        Args:
-            paths (List[Path]): List of target file paths.
-            contents (List[str]): Corresponding file contents.
-
-        Raises:
-            ValueError: If paths and contents lengths differ.
-            OSError: If any file write fails.
-        """
-        if len(paths) != len(contents):
-            logger.error(
-                "Write batch failed — mismatch length (paths=%d, contents=%d)",
-                len(paths),
-                len(contents),
-            )
-            raise ValueError(
-                f"paths and contents must have same length "
-                f"(got {len(paths)} and {len(contents)})"
-            )
-
-        logger.info("Writing batch of %d files", len(paths))
-
-        for path, content in zip(paths, contents):
-            self.write(path=path, content=content)
-
-        logger.info("Batch write completed (%d files)", len(paths))
-
     def consume(self, path: Path) -> str:
         """
         Read and validate a file's content.
@@ -256,25 +175,3 @@ class FileHandler:
 
         logger.debug("File consumed successfully: %s", path)
         return content
-
-    def batch_consume(self, paths: List[Path]) -> List[str]:
-        """
-        Read and validate multiple files in batch mode.
-
-        Args:
-            paths (List[Path]): List of file paths.
-
-        Returns:
-            List[str]: List of validated file contents.
-
-        Raises:
-            ValueError: If any file content is empty.
-            OSError: If file reading fails.
-        """
-        logger.info("Consuming batch of %d files", len(paths))
-
-        contents = self._read_batch(paths=paths)
-        self._batch_enforce_non_empty(contents=contents, paths=paths)
-
-        logger.info("Batch consume completed (%d files)", len(paths))
-        return contents
