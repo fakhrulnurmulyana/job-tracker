@@ -2,7 +2,7 @@ import json
 import logging
 
 from typing import Any, Dict
-from job_tracker.interface import LLMClient
+from job_tracker.core.interface import LLMClient
 
 
 

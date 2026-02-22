@@ -1,11 +1,11 @@
 import logging
 
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 from job_tracker.core import batch_strip_html
 from job_tracker.infrastructure import LoadingStatus
-from job_tracker.interface import (    
+from job_tracker.services.interface import (    
     EditorLauncher,
     FileHandler,
     FileSplitter,
@@ -162,6 +162,7 @@ class JobPipelineService:
             normalizer=self.normalizer, 
             paths=self.paths,
             saver=self.saver,
+            handler=self.file_handler,
             input_fname= input_fname
         )
     

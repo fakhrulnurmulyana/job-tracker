@@ -3,19 +3,23 @@ import logging
 from typing import List, Dict, Any
 
 from job_tracker.core import job_validator
-from job_tracker.interface import JobNormalizer, PathResolver, JobDocumentSaver
-from job_tracker.infrastructure import FileHandler, output_fname
+from job_tracker.services.interface import (
+    JobNormalizer, 
+    PathResolver, 
+    JobDocumentSaver, 
+    FileHandler
+)
+from job_tracker.infrastructure import output_fname
 
 
 logger = logging.getLogger(__name__)
-
-handler = FileHandler()
 
 def job_processor( 
     prompts: List[str],
     normalizer: JobNormalizer, 
     paths: PathResolver,
     saver:JobDocumentSaver,
+    handler: FileHandler,
     input_fname: str,
 ) -> None:
     """
