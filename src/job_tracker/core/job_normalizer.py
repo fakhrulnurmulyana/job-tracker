@@ -1,7 +1,7 @@
 import json
 import logging
 
-from typing import Dict
+from typing import Any, Dict
 from job_tracker.interface import LLMClient
 
 
@@ -32,7 +32,7 @@ class JobNormalizer:
         # Inject LLM dependency to keep this class testable and decoupled
         self.client = client
     
-    def normalize(self, prompt: str) -> Dict:
+    def normalize(self, prompt: str) -> Dict[str, Any]:
         """
         Execute a normalization prompt using the LLM client and parse
         the JSON response.

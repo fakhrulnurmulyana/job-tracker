@@ -1,29 +1,33 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Protocol, Optional
 
-class EditorLauncher(ABC):
+class EditorLauncher(Protocol):
     """
-    Abstract base class for launching a system editor.
+    Contract for launching a file in a text editor.
 
-    Implementations should provide a method to open a file
-    in a specified editor or fall back to system defaults.
+    Implementations define how a file is opened using a specific editor
+    or the system default editor, depending on the provided arguments
+    and execution environment.
     """
-
-    @abstractmethod
     def open(
         self, 
         path: Path, 
         editor: Optional[str] = None
     ) -> None:
         """
-        Open a file in an editor.
+        Open the given file path in a text editor.
 
         Args:
-            path (Path): Path to the file to open.
-            editor (Optional[str]): Editor program to use. Defaults to system editor.
+            path (Path): Path to the file that should be opened.
+            editor (Optional[str], optional): Name or command of the editor
+                to use (e.g., "vim", "code"). If None, the system default
+                editor should be used.
+
+        Returns:
+            None
 
         Raises:
-            NotImplementedError: If method is not implemented in subclass.
+            FileNotFoundError: If the specified path does not exist.
+            OSError: If the editor process fails to start.
         """
         ...

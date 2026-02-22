@@ -1,22 +1,27 @@
-from abc import abstractmethod
+from typing import Protocol
 
-class FileSplitter:
+class FileSplitter(Protocol):
     """
-    Handles splitting large text content into smaller segments.
-    """
+    Contract for splitting raw text data into smaller segments.
 
-    @abstractmethod 
-    def split(self, data:str)->tuple:
+    Implementations define the splitting strategy (e.g., by token limit,
+    paragraph, delimiter, or model-specific constraints).
+    """
+    def split(self, data: str) -> tuple[list[str], int]: 
         """
-        Split text data into smaller segments.
+        Split raw text into multiple segments.
 
         Args:
-            data (str): Raw text data to split.
+            data (str): Raw input text to be divided.
 
         Returns:
-            tuple: A tuple (list of split segments, number of segments).
+            tuple[list[str], int]:
+                - A list of text segments produced by the splitting process.
+                - The total number of segments generated.
 
-        Raises:
-            NotImplementedError: If method is not implemented.
+        Notes:
+            The splitting strategy (e.g., fixed size, semantic boundary,
+            or LLM token constraint) is determined by the concrete
+            implementation.
         """
         ...

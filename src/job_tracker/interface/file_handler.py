@@ -1,80 +1,51 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, Protocol 
 
-class FileHandler(ABC):
+class FileHandler(Protocol):
     """
-    Abstract base class for handling file operations.
+    Contract for basic file I/O operations.
 
-    Implementations should support writing, reading, and batch processing of files.
+    Implementations define how file content is written to and read from
+    a storage medium (e.g., local filesystem, remote storage, or in-memory).
     """
-
-    @abstractmethod
     def write(
         self,
         path: Path,
-        content: Optional[str],
-        overwrite: bool,
+        content: Optional[str] = None,
+        overwrite: bool = False,
     ) -> None:
         """
-        Write content to a file.
+        Write content to the specified file path.
 
         Args:
-            path (Path): File path to write.
-            content (Optional[str]): File content.
-            overwrite (bool): Whether to overwrite if the file exists.
-
-        Raises:
-            NotImplementedError: If method is not implemented.
-        """
-        ...
-        
-    @abstractmethod
-    def write_batch(
-        self,
-        paths: List[Path],
-        contents: List[str],
-    )->None:
-        """
-        Write multiple files in batch.
-
-        Args:
-            paths (List[Path]): List of file paths.
-            contents (List[str]): Corresponding file contents.
-
-        Raises:
-            NotImplementedError: If method is not implemented.
-        """
-        ...
-
-    @abstractmethod
-    def consume(self, path: Path)->str:
-        """
-        Read and validate a single file.
-
-        Args:
-            path (Path): File path to read.
+            path (Path): Target file path.
+            content (Optional[str], optional): Text content to write.
+                If None, behavior is defined by the implementation
+                (e.g., create empty file or raise an error).
+            overwrite (bool, optional): Whether to overwrite the file
+                if it already exists. Defaults to False.
 
         Returns:
-            str: File content.
+            None
 
         Raises:
-            NotImplementedError: If method is not implemented.
+            FileExistsError: If the file exists and overwrite is False.
+            OSError: If an I/O-related error occurs.
         """
         ...
-        
-    @abstractmethod
-    def batch_consume(self, paths:List[Path])->List[str]:
+
+    def consume(self, path: Path) -> str:
         """
-        Read and validate multiple files.
+        Read and return the content of a file.
 
         Args:
-            paths (List[Path]): List of file paths.
+            path (Path): Path to the file to be read.
 
         Returns:
-            List[str]: List of file contents.
+            str: File content as a string.
 
         Raises:
-            NotImplementedError: If method is not implemented.
+            FileNotFoundError: If the file does not exist.
+            OSError: If an I/O-related error occurs.
         """
         ...

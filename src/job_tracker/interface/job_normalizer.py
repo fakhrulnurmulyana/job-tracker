@@ -1,22 +1,26 @@
-from abc import ABC, abstractmethod
-from job_tracker.schemas import JobDocumentSchema
-from typing import List
+from typing import Any, Dict, Protocol
 
 
-class JobNormalizer(ABC):
+class JobNormalizer(Protocol):
     """
-    Abstract base class for job document normalization.
+    Contract for normalizing raw job-related text into structured data.
+
+    Implementations are responsible for transforming an unstructured
+    prompt (e.g., job description text) into a standardized dictionary
+    format that can be stored, validated, or further processed.
     """
 
-    @abstractmethod
-    def normalize(self, prompt:str)->List[JobDocumentSchema]:
+    def normalize(self, prompt: str) -> Dict[str, Any]:
         """
-        Normalize a batch of prompts into structured job documents.
+        Normalize raw job text into a structured representation.
 
         Args:
-            prompts (List[str]): List of normalization prompts.
+            prompt (str): Unstructured job-related text (e.g., job
+                description or posting content).
 
         Returns:
-            List[JobDocumentSchema]: List of normalized job documents.
+            Dict[str, Any]: Structured representation of the job data.
+                The expected schema should be defined and documented
+                by the concrete implementation.
         """
         ...

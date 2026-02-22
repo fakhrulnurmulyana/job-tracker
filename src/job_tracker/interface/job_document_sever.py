@@ -1,26 +1,34 @@
-from abc import ABC, abstractmethod
-from job_tracker.schemas import JobDocumentSchema
 from pathlib import Path
+from typing import Protocol
 
-class JobDocumentSaver(ABC):
-    """
-    Abstract base class for saving job documents to disk.
-    """
+from job_tracker.schemas import JobDocumentSchema
 
-    @abstractmethod
+class JobDocumentSaver(Protocol):
+    """
+    Contract for persisting normalized job documents to storage.
+
+    Implementations define how and where job documents are saved
+    (e.g., filesystem, database, cloud storage).
+    """
     def batch_save(
         self, 
         doc: JobDocumentSchema, 
         path: Path,
     )-> None:
         """
-        Save multiple job documents in batch.
+        Persist a normalized job document to the specified location.
 
         Args:
-            docs (List[JobDocumentSchema]): List of normalized job documents.
-            paths (List[Path]): Corresponding output file paths.
+            doc (JobDocumentSchema): Normalized job document instance
+                to be saved.
+            path (Path): Target filesystem path where the document
+                will be written.
 
-        Raises:
-            NotImplementedError: If method is not implemented.
+        Returns:
+            None
+
+        Notes:
+            Implementations may handle directory creation, overwrite
+            behavior, and serialization format.
         """
         ...
