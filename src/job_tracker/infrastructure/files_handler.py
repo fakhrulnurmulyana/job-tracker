@@ -10,14 +10,24 @@ logger = logging.getLogger(__name__)
 
 class FileHandler:
     """
-    Provide safe and controlled file read, write, and delete operations.
+    Utility class for safe and controlled file operations.
 
-    This class ensures:
-    - Atomic file writes using temporary files
-    - Validation of non-empty content
+    This class encapsulates common file I/O patterns such as:
     - Safe file deletion
-    - Batch processing support
-    - Consistent logging and error handling
+    - Atomic file writing
+    - UTF-8 text reading
+    - Non-empty content validation
+
+    Design goals:
+    - Prevent partial writes via atomic replacement.
+    - Avoid accidental deletion of non-file paths.
+    - Enforce content integrity when consuming files.
+    - Provide structured logging for observability.
+
+    Notes:
+        - All file reads and writes use UTF-8 encoding.
+        - Methods prefixed with "_" are internal helpers and
+          not intended for public use.
     """
 
     def _is_empty(self, content: Optional[str]) -> bool:
