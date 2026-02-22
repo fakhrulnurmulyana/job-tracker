@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 
 
 logger = logging.getLogger(__name__)

@@ -16,6 +16,8 @@ from job_tracker.services.interface import (
 from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.services.job_processor import job_processor
 
+
+
 logger = logging.getLogger(__name__)
 
 
