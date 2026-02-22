@@ -33,7 +33,7 @@ class FileSplitter:
 
         logger.debug(
             "Splitting data using delimiter '%s' (input size=%d chars)",
-            self.DELIMITER,
+            "==JOB==",
             len(data),
         )
 

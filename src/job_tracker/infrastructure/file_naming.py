@@ -2,6 +2,7 @@ import re
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from typing import Any, Dict
 
 from job_tracker.schemas import JobDocumentSchema
 
@@ -25,11 +26,11 @@ def input_fname()->str:
     """
     timestamp = datetime.now(
         ZoneInfo("Asia/Jakarta")
-    ).strftime("%Y-%m-%d_%H-%M-%S")
+    ).strftime("%Y-%m-%d")
 
     return timestamp
 
-def output_fname(doc:JobDocumentSchema)-> str:
+def output_fname(doc:Dict[str, Any], input_fname:str)-> str:
     """
     Generate a file name based on job category and company name.
 
@@ -37,7 +38,7 @@ def output_fname(doc:JobDocumentSchema)-> str:
     "<job_category>_<company_name>".
 
     Args:
-        doc (JobDocumentSchema): Structured job document containing
+        doc Dict[str, Any]: Dict data containing
             job and company information.
 
     Returns:

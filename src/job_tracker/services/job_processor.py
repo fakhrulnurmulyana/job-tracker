@@ -4,10 +4,12 @@ from typing import List, Dict, Any
 
 from job_tracker.core import job_validator
 from job_tracker.interface import JobNormalizer, PathResolver, JobDocumentSaver
-from job_tracker.infrastructure import file_naming, FileHandler
+from job_tracker.infrastructure import FileHandler, output_fname
 
 
 logger = logging.getLogger(__name__)
+
+handler = FileHandler()
 
 def job_processor( 
     prompts: List[str],
@@ -72,20 +74,21 @@ def job_processor(
 
         logger.debug("Normalization completed for prompt %d", index)
 
-        output_name = file_naming(job_doc)
-        logger.debug("Generated output name: %s", output_name)
+        llm_output_fname=f"temp_{input_fname}"
+        
+        logger.debug("Generated output name: %s", llm_output_fname)
 
         output_llm_path = paths.output_llm_file(
-            name=output_name,
+            name=llm_output_fname,
             input_fname=input_fname,
         )
 
         logger.debug("Resolved LLM output path: %s", output_llm_path)
 
-        FileHandler.write(
-            path=output_llm_path,
-            content=job_doc,
-        )
+
+        job_doc_str = str(job_doc)
+
+        handler.write(path=output_llm_path, content=job_doc_str)
 
         logger.debug("Raw LLM output written to disk")
 
@@ -93,7 +96,9 @@ def job_processor(
             data=job_doc
         )
 
-        logger.info("Schema validation completed for '%s'", output_name)
+        logger.info("Schema validation completed for '%s'", llm_output_fname)
+
+        output_name = output_fname(validate_job_doc)
 
         finalized_path = paths.finalized_file(
             name=output_name,
