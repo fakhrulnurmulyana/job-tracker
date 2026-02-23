@@ -10,43 +10,31 @@ This project demonstrates:
 * Practical LLM integration for real-world data workflows
 
 > ⚠️ **Project Status**: Active development  
-> Current version: **v2.1.1**
+> Current version: **v3.0.0**
 
 ---
 
-# What's New in v2.1.1
+# What's New in v3.0.0
 
-This release introduces minor improvements focused on output consistency and developer experience.
+This release introduces a simplified user workflow and improvements to file handling and pipeline execution.
 
-## Improvements
+## Changes
 
-* Output JSON filenames now use the **job position** directly instead of analyzed job categories
-* Improved output naming consistency for easier identification and tracking
-* Minor internal refinements and cleanup
-
----
-
-# Previous Updates (v2.1.0)
-
-This version introduced significant architectural improvements and new features:
-
-## Updated Improvement Notes
-
-* Refactored folder structure with clearer separation of responsibilities
-* Introduced **incremental processing & persistence** (each job is saved immediately after completion to prevent total batch failure)
-* Dedicated **pipeline module** for orchestration logic
-* Entry point fully decoupled from business logic
-* Added additional **type hints** for better readability and maintainability
-* Introduced **abstract methods / interfaces** to improve testability
-* Improved modularization between:
-
-  * domain logic
-  * infrastructure
-  * persistence
-  * services
-  * prompts
+- Input filenames are now generated automatically based on execution time.
+- Improved file organization under `finalized_data/`.
+- Added validation for company and job position names.
+- Refactored pipeline to operate on validated variables instead of repeated file reads.
+- Simplified saving workflow and removed unnecessary intermediate outputs.
+- General refactoring, cleanup, and documentation improvements.
 
 ---
+
+# Previous Updates (v2.1.1)
+
+This version introduced improvements focused on output consistency and developer experience:
+
+- Improved output naming consistency
+- Minor internal refinements and cleanup
 
 # Purpose
 
@@ -100,7 +88,7 @@ The system will:
 
 ---
 
-## 2. HTML Input Support (NEW)
+## 2. HTML Input Support
 
 Some job portals prevent direct copy-paste of clean text.
 
@@ -142,18 +130,10 @@ Logs are excluded from version control.
 # Project Structure (v2.1.0)
 
 ```
-JOB_TRACKER/
+JOB-TRACKER
 │
 ├── data/
-│   ├── cleaned/
-│   ├── finalized/
-│   ├── raw/
-│   └── split/
-│
 ├── logs/
-│   ├── app.log
-│   ├── debug.log
-│   └── error.log
 │
 ├── src/
 │   └── job_tracker/
@@ -161,23 +141,19 @@ JOB_TRACKER/
 │       ├── core/
 │       │   ├── __init__.py
 │       │   ├── job_normalizer.py
+│       │   ├── job_validator.py
+│       │   ├── llm_client.py
 │       │   └── text_cleaner.py
 │       │
 │       ├── infrastructure/
+│       │   ├── __init__.py
+│       │   ├── editor.py
+│       │   ├── file_naming.py
+│       │   ├── file_splitter.py
 │       │   ├── files_handler.py
+│       │   ├── job_document_saver.py
 │       │   ├── loading.py
 │       │   └── path.py
-│       │
-│       ├── interface/
-│       │   ├── __init__.py
-│       │   ├── editor_launcher.py
-│       │   ├── file_handler.py
-│       │   ├── file_naming.py
-│       │   ├── file_split.py
-│       │   ├── job_document_server.py
-│       │   ├── job_normalizer.py
-│       │   ├── llm_client.py
-│       │   └── path_resolver.py
 │       │
 │       ├── prompts/
 │       │   ├── __init__.py
@@ -187,60 +163,30 @@ JOB_TRACKER/
 │       │   ├── __init__.py
 │       │   └── job_schema.py
 │       │
-│       ├── services/
-│       │   ├── __init__.py
-│       │   ├── gemini_client.py
-│       │   ├── job_pipeline_services.py
-│       │   └── job_processor.py
-│       │
-│       ├── __init__.py
-│       ├── logging_config.py
-│       ├── main.py
-│       └── settings.py
+│       └── services/
+│           │
+│           ├── interface/
+│           │   ├── __init__.py
+│           │   ├── editor_launcer.py
+│           │   ├── file_handler.py
+│           │   ├── file_split.py
+│           │   ├── job_document_sever.py
+│           │   ├── job_normalizer.py
+│           │   └── path_resolver.py
+│           │
+│           ├── __init__.py
+│           ├── gemini_client.py
+│           ├── job_pipeline_services.py
+│           ├── job_processor.py
+│           ├── logging_config.py
+│           ├── main.py
+│           └── settings.py
 │
 ├── .env
-├── .env.example
 ├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
-
----
-
-# Architecture Principles
-
-This project follows:
-
-* Single Responsibility Principle (SRP)
-* Dependency Inversion Principle (DIP)
-* Explicit dependency flow
-* Clear separation between:
-
-  * Domain
-  * Application
-  * Infrastructure
-  * Persistence
-
-## Pipeline-Oriented Flow
-
-The orchestration logic is now isolated into a dedicated pipeline layer.
-
-`main.py`:
-
-* Only handles entry point
-* Delegates execution to pipeline service
-
-Pipeline:
-
-* Coordinates:
-
-  * File handling
-  * HTML cleaning
-  * Job splitting
-  * LLM normalization
-  * Validation
-  * Persistence
-
 ---
 
 # Requirements
@@ -281,14 +227,13 @@ python -m job_tracker.main
 
 # Application Flow (v2.1.0)
 
-1. User provides file name
-2. Local editor opens
-3. User inputs:
+1. Local editor opens
+2. User inputs:
 
    * Plain text OR
    * Raw HTML OR
    * Multiple jobs separated by `==JOB==`
-4. System:
+3. System:
 
    * Splits jobs
    * Cleans HTML
@@ -335,5 +280,3 @@ This project serves as:
 * Internal tooling
 * Portfolio-grade clean architecture implementation
 * LLM-integrated data processing pipeline
-
-The architecture is intentionally designed to scale without requiring major structural changes as the system evolves.
