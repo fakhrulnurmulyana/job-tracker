@@ -47,9 +47,9 @@ class PathResolver(Protocol):
         """
         ...
     
-    def output_llm_file(
+    def temp_finalized_file(
         self,
-        name: List[str],
+        name: List[str], 
         input_fname: str,
         suffix: str = ".json",
     )-> Path:

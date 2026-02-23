@@ -41,14 +41,12 @@ class JobProcessor:
     )->None:
         llm_output_fname=f"temp_{index}_{self.input_fname}"
 
-        output_llm_path = self.paths.finalized_file(
+        output_llm_path = self.paths.temp_finalized_file(
             name=llm_output_fname,
             input_fname=self.input_fname,
         )
 
-        job_doc_str = str(job_doc)
-
-        self.handler.write(path=output_llm_path, content=job_doc_str)
+        self.saver.save(doc=job_doc, path=output_llm_path)
 
     def _validated_file_saver(
         self,

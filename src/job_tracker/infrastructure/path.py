@@ -67,3 +67,13 @@ class PathResolver:
         default_path = self.finalized_dir
 
         return default_path / input_fname / f"{name}{suffix}"
+    
+    def temp_finalized_file(
+        self,
+        name: List[str], 
+        input_fname: str,
+        suffix: str = ".json",
+    )-> Path:
+        default_path = self.finalized_dir
+
+        return default_path / input_fname / f"{name}{suffix}"
