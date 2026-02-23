@@ -67,13 +67,3 @@ class PathResolver:
         default_path = self.finalized_dir
 
         return default_path / input_fname / f"{name}{suffix}"
-    
-    def output_llm_file(
-        self,
-        name: List[str],
-        input_fname: str,
-        suffix: str = ".json",
-    )-> Path:
-        default_path = self.output_llm_dir
-
-        return default_path / input_fname / f"temp_{name}{suffix}" 

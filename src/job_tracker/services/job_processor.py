@@ -78,11 +78,11 @@ def job_processor(
 
         logger.debug("Normalization completed for prompt %d", index)
 
-        llm_output_fname=f"temp_{input_fname}"
+        llm_output_fname=f"temp_{index}_{input_fname}"
         
         logger.debug("Generated output name: %s", llm_output_fname)
 
-        output_llm_path = paths.output_llm_file(
+        output_llm_path = paths.finalized_file(
             name=llm_output_fname,
             input_fname=input_fname,
         )
@@ -112,6 +112,8 @@ def job_processor(
         logger.debug("Final output path resolved: %s", finalized_path)
 
         saver.save(doc=validate_job_doc, path=finalized_path)
+
+        output_llm_path
 
         logger.info(
             "Finalized job document '%s' saved successfully",
