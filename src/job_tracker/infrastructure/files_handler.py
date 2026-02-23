@@ -42,7 +42,7 @@ class FileHandler:
         """
         return content is None or not content.strip()
 
-    def _delete(self, path: Path) -> None:
+    def delete(self, path: Path) -> None:
         """
         Safely delete a file if it exists and is a regular file.
 
@@ -91,7 +91,7 @@ class FileHandler:
 
         if self._is_empty(content):
             logger.warning("Empty content detected for: %s", path)
-            self._delete(path)
+            self.delete(path)
             raise ValueError(f"File content must not be empty: {path}")
 
     def _read(self, path: Path) -> str:

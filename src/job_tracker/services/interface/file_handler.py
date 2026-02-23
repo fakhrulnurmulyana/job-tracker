@@ -8,6 +8,23 @@ class FileHandler(Protocol):
     Implementations define how file content is written to and read from
     a storage medium (e.g., local filesystem, remote storage, or in-memory).
     """
+    def delete(self, path: Path) -> None:
+        """
+        delete content to the specified file path.
+
+        Args:
+            path (Path): Target file path.
+
+        Returns:
+            None
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            PermissionError: If deletion is not permitted.
+            OSError: If an unexpected filesystem error occurs.
+        """
+        ...
+
     def write(
         self,
         path: Path,

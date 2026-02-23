@@ -1,5 +1,6 @@
 import logging
 
+from pathlib import Path
 from typing import List, Dict, Any
 
 from job_tracker.core import job_validator
@@ -38,7 +39,7 @@ class JobProcessor:
         self, 
         index: int, 
         job_doc: Dict[str, Any]
-    )->None:
+    )->Path:
         llm_output_fname=f"temp_{index}_{self.input_fname}"
 
         output_llm_path = self.paths.temp_finalized_file(
@@ -47,6 +48,8 @@ class JobProcessor:
         )
 
         self.saver.save(doc=job_doc, path=output_llm_path)
+
+        return output_llm_path
 
     def _validated_file_saver(
         self,
@@ -66,11 +69,14 @@ class JobProcessor:
             job_doc=self.normalizer.normalize(
                         prompt=prompt,
                     )
-            self._temp_file_saver(
+            output_llm_path = self._temp_file_saver(
                 index=index, 
                 job_doc=job_doc,
             )
-            validate_job_doc = job_validator(
-                data=job_doc
-            )
-            self._validated_file_saver(validate_job_doc=validate_job_doc)
+            try:
+                validate_job_doc = job_validator(
+                    data=job_doc
+                )
+                self._validated_file_saver(validate_job_doc=validate_job_doc)
+            finally:
+                self.handler.delete(path=output_llm_path)
