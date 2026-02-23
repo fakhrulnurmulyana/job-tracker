@@ -14,7 +14,7 @@ from job_tracker.services.interface import (
     PathResolver,
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
-from job_tracker.services.job_processor import job_processor
+from job_tracker.services.job_processor import JobProcessor
 
 
 
@@ -159,14 +159,16 @@ class JobPipelineService:
         )
         logger.debug("Normalization prompts generated.")
 
-        job_processor(
-            prompts=prompts, 
+        job_processor= JobProcessor(
+            prompts=prompts,
             normalizer=self.normalizer, 
             paths=self.paths,
             saver=self.saver,
             handler=self.file_handler,
-            input_fname= input_fname
+            input_fname=input_fname,
         )
+
+        job_processor.process()
     
         logger.info("Finalized job documents saved successfully.")
 
