@@ -143,8 +143,8 @@ ENUM CONSTRAINTS:
   full_time, part_time, contract, internship, freelance
 - work_mode:
   on_site, remote, hybrid
-- application.status:
-  open, applied, interview, offered, rejected, closed, unknown
+- application.current_status AND application.timeline.status:
+  applied, interview, offered, rejected, closed, unknown
 - job.category:
   ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer
 - job.education_required.min_education and  job.education_required.max_education:
@@ -218,10 +218,10 @@ JSON SCHEMA:
     "last_active": null
   }},
   "application": {{
-    "status": "unknown",
-    "applied_at": null,
-    "deadline": null,
-    "notes": null
+    "current_status": "unknown",
+    "timeline": [
+      {{"status": "unknown", "event_date": null}}
+    ]
   }},
   "source": {{
     "platform": null,

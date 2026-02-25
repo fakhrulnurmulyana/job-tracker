@@ -1,3 +1,5 @@
+from datetime import date
+from enum import Enum
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field, HttpUrl, model_validator
 
@@ -258,28 +260,60 @@ class RecruiterSchema(BaseModel):
     last_active: Optional[str] = None
 
 
+class ApplicationStatus(str, Enum):
+    applied = "applied"
+    interview = "interview"
+    offered = "offered"
+    rejected = "rejected"
+    closed = "closed"
+    unknown = "unknown"
+
+
+class TimelineEntry(BaseModel):
+    """
+    Represent one status event in the application timeline.
+    """
+
+    status: ApplicationStatus = Field(
+        ...,
+        description="Application status at a specific time."
+    )
+    event_date: Optional[date] = Field(
+        None,
+        description="Date when the status occurred."
+    )
+
+
 class ApplicationSchema(BaseModel):
     """
-    Application lifecycle metadata.
+    Application tracking schema.
 
-    Attributes:
-        status (Literal[...]): Current status of the application.
-        applied_at (Optional[str]): Timestamp when applied.
-        deadline (Optional[str]): Application deadline.
-        notes (Optional[str]): Additional notes or comments.
+    Stores current status and full status timeline.
     """
-    status: Literal[
-        "open",
-        "applied",
-        "interview",
-        "offered",
-        "rejected",
-        "closed",
-        "unknown"
-    ] = Field(default="unknown")
-    applied_at: Optional[str] = None
-    deadline: Optional[str] = None
-    notes: Optional[str] = None
+
+    current_status: ApplicationStatus = ApplicationStatus.unknown
+    timeline: List[TimelineEntry] = Field(
+        default_factory=lambda: [
+            TimelineEntry(
+                status=ApplicationStatus.unknown,
+                event_date=None
+            )
+        ]
+    )
+
+    @model_validator(mode="after")
+    def validate_current_status_exists(self):
+        """
+        Ensure current_status exists inside timeline.
+        """
+        statuses = [entry.status for entry in self.timeline]
+
+        if self.current_status not in statuses:
+            raise ValueError(
+                "current_status must exist in timeline."
+            )
+
+        return self
 
 
 class SourceSchema(BaseModel):
