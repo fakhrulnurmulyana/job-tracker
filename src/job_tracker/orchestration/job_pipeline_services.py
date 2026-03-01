@@ -5,7 +5,7 @@ from typing import List
 
 from job_tracker.core import batch_strip_html
 from job_tracker.infrastructure import LoadingStatus
-from job_tracker.services.interface import (    
+from job_tracker.orchestration.interface import (    
     EditorLauncher,
     FileHandler,
     FileSplitter,
@@ -14,7 +14,7 @@ from job_tracker.services.interface import (
     PathResolver,
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
-from job_tracker.services.job_processor import JobProcessor
+from job_tracker.orchestration.job_processor import JobProcessor
 
 
 
