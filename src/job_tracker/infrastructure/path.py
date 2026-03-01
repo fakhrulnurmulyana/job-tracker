@@ -24,20 +24,19 @@ class PathResolver:
         # Define raw and processed data directories
         self.raw_dir = self.data_path / "raw"
         self.finalized_dir = self.data_path / "finalized"
-        self.output_llm_dir = self.data_path / "output_llm"
 
-        self._ensure_directories()
-
-    def _ensure_directories(self) -> None:
+    def _ensure_directories(self, path: Path) -> None:
         """
         Ensure required directories exist at initialization time.
 
         Creates the raw, cleaned, split, and finalized directories
         if they do not already exist.
         """
-        self.raw_dir.mkdir(parents=True, exist_ok=True)
-        self.finalized_dir.mkdir(parents=True, exist_ok=True)
-        self.output_llm_dir.mkdir(parents=True, exist_ok=True)
+        path.mkdir(parents=True, exist_ok=True)
+
+    def finalized_directory(self):
+        self._ensure_directories(path=self.finalized_dir)
+        return self.finalized_dir
 
     def raw_file(self, name: str, suffix: str = ".txt") -> Path:
         """
@@ -55,8 +54,12 @@ class PathResolver:
         """
         if name == "":
             raise ValueError("File name must not be empty")
+
+        self._ensure_directories(path=self.raw_dir)
         
-        return self.raw_dir / f"{name}{suffix}"
+        raw_path = self.raw_dir / f"{name}{suffix}"
+        
+        return raw_path
     
     def finalized_file(
         self, 
@@ -64,9 +67,11 @@ class PathResolver:
         input_fname: str,
         suffix: str = ".json",
     )-> Path:
-        default_path = self.finalized_dir
+        self._ensure_directories(path=self.finalized_dir)
 
-        return default_path / input_fname / f"{name}{suffix}"
+        finalized_path = self.finalized_dir / input_fname / f"{name}{suffix}"
+
+        return finalized_path
     
     def temp_finalized_file(
         self,
@@ -74,6 +79,8 @@ class PathResolver:
         input_fname: str,
         suffix: str = ".json",
     )-> Path:
-        default_path = self.finalized_dir
+        self._ensure_directories(path=self.finalized_dir)
 
-        return default_path / input_fname / f"{name}{suffix}"
+        temp_finalized_path = self.finalized_dir / input_fname / f"{name}{suffix}"
+
+        return temp_finalized_path
