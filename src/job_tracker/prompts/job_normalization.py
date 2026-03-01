@@ -50,6 +50,22 @@ GENERAL RULES:
 - Use lowercase letters only for all string values
 - If salary min or max is not null, displayed MUST be true
 
+ENUM CONSTRAINTS:
+- requirement.level: beginner, intermediate, advanced, null
+- requirement.priority: must_have, nice_to_have, null
+- requirement.category:
+  technical_skill, soft_skill, education, experience, certification, other
+- employment_type:
+  full_time, part_time, contract, internship, freelance
+- work_mode:
+  on_site, remote, hybrid
+- application.current_status AND application.timeline.status:
+  applied, interview, offered, rejected, closed, unknown
+- job.category:
+  ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer
+- job.education_required.min_education and  job.education_required.max_education:
+  "high_school", "diploma", "bachelor_degree", "master_degree", "doctoral_degree",
+
 COMPANY NORMALIZATION RULES:
 - Company names must contain only lowercase letters and spaces.
 - Remove company prefixes such as: pt, cv, inc, ltd, corp, co., tbk.
@@ -133,22 +149,6 @@ RIBA EXTRACTION RULES:
   - relation MUST be "direct" or "indirect"
   - reason MUST be provided
 - Do NOT assume riba involvement without explicit evidence
-
-ENUM CONSTRAINTS:
-- requirement.level: beginner, intermediate, advanced, null
-- requirement.priority: must_have, nice_to_have, null
-- requirement.category:
-  technical_skill, soft_skill, education, experience, certification, other
-- employment_type:
-  full_time, part_time, contract, internship, freelance
-- work_mode:
-  on_site, remote, hybrid
-- application.current_status AND application.timeline.status:
-  applied, interview, offered, rejected, closed, unknown
-- job.category:
-  ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer
-- job.education_required.min_education and  job.education_required.max_education:
-  "high_school", "diploma", "bachelor_degree", "master_degree", "doctoral_degree",
 
 REQUIREMENT DETAILS RULES:
 - Use requirement.details ONLY for supplementary information
