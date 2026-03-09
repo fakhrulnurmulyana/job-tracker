@@ -60,9 +60,9 @@ ENUM CONSTRAINTS:
 - work_mode:
   on_site, remote, hybrid
 - application.current_status AND application.timeline.status:
-  applied, interview, offered, rejected, closed, unknown
+  applied, interview, offered, rejected, unknown
 - job.category:
-  ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer
+  ai engineer, ml engineer, data analyst, data engineer, odoo developer, python developer, data_scientist, other.
 - job.education_required.min_education and  job.education_required.max_education:
   "high_school", "diploma", "bachelor_degree", "master_degree", "doctoral_degree",
 
@@ -71,20 +71,52 @@ COMPANY NORMALIZATION RULES:
 - Remove company prefixes such as: pt, cv, inc, ltd, corp, co., tbk.
 - Do not include numbers in company names.
 
+COMPANY ADDRESS EXTRACTION RULES:
+- Extract the company address into a structured object under "address".
+- Always preserve the original address text in "full_address".
+- Extract the following fields when they are explicitly mentioned:
+  - "street"
+  - "village"
+  - "district"
+  - "city"
+  - "province"
+  - "postal_code"
+- Use Indonesian administrative hierarchy when identifying locations:
+  - "village" refers to "kelurahan" or "desa".
+  - "district" refers to "kecamatan".
+  - "city" refers to "kota" or "kabupaten".
+  - "province" refers to "provinsi".
+- Keep location names exactly as written in the source text.
+- Do NOT translate or modify location names.
+- If a component is not explicitly mentioned, set the field to null.
+- Do NOT infer, assume, or guess missing address components.
+- If no company address is mentioned, set all address fields to null.
+- Recognize common abbreviations such as "Jl.", "Kel.", "Kec.", "Kab.", and "Kota".
+
 SALARY NORMALIZATION RULES:
-- Salary values MUST be numeric integers only
-- Do NOT include symbols, separators, or decimals
-- Use IDR as currency
-- If salary is mentioned in any other currency, convert it to IDR
-- If only one value is found, set both min and max to that value
-- If salary is not mentioned, set min and max to null and displayed to false
+- Salary values MUST represent millions of IDR.
+- `min` and `max` MUST be numeric integers only.
+- Do NOT include symbols, separators, decimals, or unit letters.
+- Always set "unit": "million".
+- Always set "currency": "IDR" (must be written in uppercase).
+- If a salary range is mentioned, extract both `min` and `max`.
+- If only one value is mentioned, set both `min` and `max` to that value.
+- If salary is mentioned in another currency, convert it to IDR before normalization.
+- If salary is not mentioned, set `min` and `max` to null and `displayed` to false.
 
 EXPERIENCE NORMALIZATION RULES:
-- Experience values MUST be numeric integers (years)
-- If a range is mentioned (e.g. 2-4 years), extract min and max
-- If only one value is mentioned, set both min_experience and max_experience
-- If experience is not mentioned, set both fields to null
-- Do NOT infer experience if not explicitly stated
+- Normalize experience into one of the following categories ONLY:
+  - "No experience"
+  - "< 1 year"
+  - "1-3 years"
+  - "3-5 years"
+  - "> 5 years"
+- If experience is explicitly mentioned, map it to the closest matching category.
+- If a range is mentioned (e.g., 2-4 years), choose the category that best represents the range.
+- If "fresh graduate", "no experience required", or similar wording is mentioned, use "No experience".
+- If experience is not explicitly mentioned, return null.
+- Do NOT infer or assume experience if it is not clearly stated.
+- Do NOT create new categories outside the list above.
 
 REQUIREMENTS EXTRACTION RULES:
 - Extract requirements as structured objects
@@ -185,19 +217,15 @@ JSON SCHEMA:
     "category": null,
     "employment_type": null,
     "work_mode": null,
-    "experience_required": {{
-      "min_experience": null,
-      "max_experience": null
-    }},
+    "experience_required": null,
     "education_required": {{
       "min_education": null,
       "max_education": null
     }},
-    "posted_at": null,
-    "updated_at": null,
     "salary": {{
       "displayed": false,
       "currency": "IDR",
+      "unit": "million",
       "min": null,
       "max": null
     }},
@@ -209,23 +237,22 @@ JSON SCHEMA:
     "name": null,
     "industry": null,
     "employee_size": null,
-    "address": null,
+    "address": {{
+      "full_address": null,
+      "street": null,
+      "village": null,
+      "district": null,
+      "city": null,
+      "province": null,
+      "postal_code": null
+    }},
     "about": null
-  }},
-  "recruiter": {{
-    "name": null,
-    "initials": null,
-    "last_active": null
   }},
   "application": {{
     "current_status": "unknown",
     "timeline": [
       {{"status": "unknown", "event_date": null}}
     ]
-  }},
-  "source": {{
-    "platform": null,
-    "language": null
   }}
 }}
 
