@@ -2,23 +2,12 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 
-from collections import Counter
-from typing import Any, Callable, List, Sequence
+from typing import Sequence
 
 
 
-class PieChart:
-    def _autopct_format(
-        self, 
-        values: List[float],
-    ) -> Callable[[float], str]:
-        def my_format(pct):
-            total = sum(values)
-            count = int(round(pct * total / 100))
-            return f'{pct:.1f}%\n({count})'
-        return my_format
-    
-    def from_two_list(
+class CircularChart:
+    def pie(
         self,
         labels: Sequence[str],
         sizes: Sequence[float],
@@ -51,23 +40,31 @@ class PieChart:
         )
 
         fig.show()
-    
-    def from_one_list(
-        self,
-        values: Sequence[Any],
+
+    def sunburst(
+        self, 
+        labels: Sequence[str],
+        parents: Sequence[str],
+        sizes:Sequence[int | float],
         title_text: str,
-        midle_text: str = "",
-    ) -> None:
-        counter = Counter(values)
+    ):
+        fig = go.Figure(go.Sunburst(
+            labels=labels,
+            parents=parents,
+            values=sizes,
+            branchvalues="total",
+        ))
 
-        labels = list(counter.keys())
-        sizes = list(counter.values())
-
-        self.from_two_list(
-            labels=labels, 
-            sizes=sizes, 
-            title_text=title_text,
-            midle_text=midle_text,
+        fig.update_traces(
+            hovertemplate=
+            "<b>%{label}</b><br>" +
+            "Jumlah: %{value}<br>" +
+            "Persen: %{percentParent:.2%}" +
+            "<extra></extra>"
         )
 
-
+        fig.update_layout(
+            margin=dict(t=0, l=0, r=0, b=0),
+            title_text=title_text,
+        )
+        fig.show()

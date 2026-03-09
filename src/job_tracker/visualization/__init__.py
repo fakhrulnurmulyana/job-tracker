@@ -1,3 +1,5 @@
-from .pie_chart import PieChart
+from .bar_chart import BarChart
+from .circular_chart import CircularChart
+from .box_plots import BoxPlots
 
-__all__=["PieChart"]
+__all__=["BarChart", "BoxPlots", "CircularChart"]
