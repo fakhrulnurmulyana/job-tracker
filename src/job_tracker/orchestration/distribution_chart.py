@@ -1,8 +1,7 @@
-from typing import Any, Callable, List, Literal, Optional, Sequence, Tuple
-
 import plotly.graph_objects as go
 
-from job_tracker.transform import counter_data
+from collections import Counter
+from typing import Any, Callable, List, Literal, Optional, Sequence, Tuple
 from job_tracker.visualization import BarChart, CircularChart, BoxPlots
 
 
@@ -64,7 +63,7 @@ class DistributionChart:
 
     # HANDLERS
     def _prepare_counter(self, data: Any):
-        counter = counter_data(data=data)
+        counter = Counter(data=data)
         labels = list(counter.keys())
         sizes = list(counter.values())
         return labels, sizes
