@@ -92,8 +92,6 @@ def main() -> None:
 
     pipeline.process(file_name)
 
-    print(f"Finished processing: {file_name}")
-
 
 if __name__ == "__main__":
     try:
