@@ -16,13 +16,10 @@ from job_tracker.infrastructure import (
     StealthScrapper,
 )
 import undetected_chromedriver as uc 
-from job_tracker.orchestration import JobPipelineService
+from job_tracker.orchestration import JobPipelineService, ScraperOrchestrator
 
 
 logger = logging.getLogger(__name__)
-
-
-
 
 def main() -> None:
     """
@@ -57,6 +54,10 @@ def main() -> None:
     # move the paths so we can use it for scrapping
     paths = PathResolver(base_path=base_path)
 
+    # scraper
+    scraper_tool = StealthScrapper()
+    scraper_orch = ScraperOrchestrator(scraper=scraper_tool, paths=paths)
+
     pipeline = JobPipelineService(
         editor=EditorLauncher(),
         file_handler=FileHandler(),
@@ -64,6 +65,7 @@ def main() -> None:
         paths=paths, # changing this
         saver=JobDocumentSaver(),
         normalizer=normalizer,
+        schraper_orch=scraper_orch
     )
 
     file_name = input_fname()
