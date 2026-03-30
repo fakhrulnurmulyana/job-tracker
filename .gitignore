@@ -9,8 +9,7 @@
 *__pycache__
 
 # File data
-/data
-src/data/
+data/
 
 # Logs
 /logs
