@@ -17,8 +17,6 @@ from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.orchestration.job_processor import JobProcessor
 from job_tracker.orchestration.scraper_service import ScraperOrchestrator
 
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +33,7 @@ class JobPipelineService:
         paths: PathResolver,
         saver: JobDocumentSaver,
         normalizer: JobNormalizer,
-        schraper_orch: ScraperOrchestrator,
+        scraper_orch: ScraperOrchestrator,
     ) -> None:
         """
         Initialize the JobPipelineService with all required dependencies.
@@ -54,7 +52,7 @@ class JobPipelineService:
         self.paths = paths
         self.saver = saver
         self.normalizer = normalizer
-        self.scraper_orch = schraper_orch
+        self.scraper_orch = scraper_orch
 
         logger.debug("JobPipelineService initialized with dependencies.")
 
@@ -198,18 +196,7 @@ class JobPipelineService:
 
         success = False
 
-        # if url:
-        #     scraper = StealthScrapper()
-        #     html_content = scraper.fetch_html(url)
-        #     raw_path = self.paths.raw_file(file_name)
-
-        #     with open(raw_path, "w", encoding="utf-8") as f:
-        #         f.write(html_content)
-
-
         try:
-
-            # 
             if url:
                 self.scraper_orch.scrape_and_save(url=url, file_name=file_name)
             else:

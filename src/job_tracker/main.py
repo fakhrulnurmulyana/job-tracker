@@ -56,7 +56,6 @@ def main() -> None:
 
     # scraper
     scraper_tool = StealthScrapper()
-    scraper_orch = ScraperOrchestrator(scraper=scraper_tool, paths=paths)
 
     pipeline = JobPipelineService(
         editor=EditorLauncher(),
@@ -65,7 +64,7 @@ def main() -> None:
         paths=paths, # changing this
         saver=JobDocumentSaver(),
         normalizer=normalizer,
-        schraper_orch=scraper_orch
+        scraper_orch=ScraperOrchestrator(scraper=scraper_tool, paths=paths)
     )
 
     file_name = input_fname()
