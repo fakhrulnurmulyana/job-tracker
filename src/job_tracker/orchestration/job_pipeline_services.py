@@ -15,6 +15,7 @@ from job_tracker.orchestration.interface import (
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.orchestration.job_processor import JobProcessor
+from job_tracker.infrastructure import StealthScrapper
 
 
 
@@ -176,6 +177,7 @@ class JobPipelineService:
     def process(
         self, 
         file_name: str, 
+        url: str = None
     ) -> None:
         """
         Execute the full job extraction pipeline: create, split, clean,
@@ -193,6 +195,14 @@ class JobPipelineService:
         api_loader = LoadingStatus(f"Normalizing text in file {file_name}.txt ")
 
         success = False
+
+        if url:
+            scraper = StealthScrapper()
+            html_content = scraper.fetch_html(url)
+            raw_path = self.paths.raw_file(file_name)
+
+            with open(raw_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
 
         try:
             raw_path = self.initiate_file(file_name=file_name)

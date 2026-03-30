@@ -21,13 +21,7 @@ from job_tracker.orchestration import JobPipelineService
 
 logger = logging.getLogger(__name__)
 
-def _safe_del(self):
-    try:
-        self.quit()
-    except Exception:
-        pass
 
-uc.Chrome.__del__ = _safe_del
 
 
 def main() -> None:
@@ -73,26 +67,9 @@ def main() -> None:
     )
 
     file_name = input_fname()
+    url = input("Enter Glints URL to scrape (leave empty to past manually) : ").strip()
 
-    # START INJECTION
-    # ask for URL, if provided, scrape it into the file.
-    glints_url = input("Enter Glints URL to scrape (leave empty to past manually) : ").strip()
-
-    if glints_url:
-        logger.info("URL Provided. Starting stealth scraper...")
-        scraper = StealthScrapper()
-        html_content = scraper.fetch_html(glints_url)
-
-        # resolve where the pipeline expects the file to be
-        raw_path = paths.raw_file(file_name)
-
-        with open(raw_path, "w", encoding="utf-8") as f:
-            f.write(html_content)
-        logger.info(f"Successfully scraped and saved to {raw_path}")
-
-    # END INJECTION
-
-    pipeline.process(file_name)
+    pipeline.process(file_name, url=url if url else None)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,14 @@ warnings.filterwarnings(
 
 logger = logging.getLogger(__name__)
 
+def _safe_del(self):
+    try:
+        self.quit()
+    except Exception:
+        pass
+
+uc.Chrome.__del__ = _safe_del
+
 class StealthScrapper:
     def __init__(self, version_main =145):
         self.version_main = version_main
