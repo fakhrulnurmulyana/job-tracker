@@ -1,3 +1,5 @@
+from datetime import date
+from enum import Enum
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field, HttpUrl, model_validator
 
@@ -50,6 +52,7 @@ class SalarySchema(BaseModel):
     Attributes:
         displayed (bool): Whether salary is explicitly mentioned.
         currency (str): Currency code (ISO 4217), default 'IDR'.
+        unit (str): Salary normalization into million, default 'million'.
         min (Optional[int]): Minimum salary.
         max (Optional[int]): Maximum salary.
     """
@@ -60,6 +63,10 @@ class SalarySchema(BaseModel):
     currency: str = Field(
         default="IDR",
         description="ISO 4217 currency code"
+    )
+    unit: str = Field(
+        default="million",
+        description="Salary normalization into million"
     )
     min: Optional[int] = Field(
         default=None,
@@ -127,23 +134,6 @@ class RequirementSchema(BaseModel):
         description="Optional detailed sub-items related to the requirement"
     )
 
-class ExperienceSchema(BaseModel):
-    """
-    Structured experience requirement in years.
-
-    Attributes:
-        min_experience (Optional[int]): Minimum years of experience.
-        max_experience (Optional[int]): Maximum years of experience.
-    """
-    min_experience: Optional[int] = Field(
-        default=None,
-        description="Minimum required experience in years"
-    )
-    max_experience: Optional[int] = Field(
-        default=None,
-        description="Maximum required experience in years"
-    )
-
 class EducationSchema(BaseModel):
     """
     Structured education requirement.
@@ -185,7 +175,6 @@ class JobSchema(BaseModel):
         category (Literal[...]): Job category.
         employment_type (Optional[Literal[...]): Employment type.
         work_mode (Optional[Literal[...]): Work mode.
-        experience_required (ExperienceSchema): Structured experience requirement.
         education_required (EducationSchema): Structured education requirement.
         posted_at (Optional[str]): Posting date.
         updated_at (Optional[str]): Last update date.
@@ -203,95 +192,133 @@ class JobSchema(BaseModel):
         "data engineer", 
         "odoo developer", 
         "python developer",
-    ] = Field(default="unknown")
+        "data_scientist", 
+        "other",
+    ] = Field(default="other")
     employment_type: Optional[
         Literal["full_time", "part_time", "contract", "internship", "freelance"]
     ] = None
     work_mode: Optional[
         Literal["on_site", "remote", "hybrid"]
     ] = None
-    experience_required: ExperienceSchema = Field(
-        default_factory=ExperienceSchema,
-        description="Structured experience requirement"
-    )
+    experience_required: Literal[
+        "No experience",
+        "< 1 year",
+        "1-3 years",
+        "3-5 years",
+        "> 5 years",
+    ] = Field(default="No experience")
     education_required: EducationSchema = Field(
         default_factory=EducationSchema,
         description="Structured education requirement"
     )
-    posted_at: Optional[str] = None
-    updated_at: Optional[str] = None
     salary: SalarySchema = Field(default_factory=SalarySchema)
     skills: List[str] = Field(default_factory=list)
     description: Optional[str] = None
     requirements: List[RequirementSchema] = Field(default_factory=list)
 
 
-class CompanySchema(BaseModel):
+class CompanyAddress(BaseModel):
     """
-    Company-related metadata.
+    Structured representation of a company address.
+
+    This model stores both the original address string and its parsed
+    administrative components. All fields are optional because
+    address extraction may be incomplete depending on the source.
 
     Attributes:
-        name (Optional[str]): Company name.
-        industry (Optional[str]): Industry or sector.
-        employee_size (Optional[str]): Number of employees.
-        address (Optional[str]): Company address.
-        about (Optional[str]): Company description.
+    full_address (Optional[str]): The original full address text as it appears in the source.
+    street (Optional[str]): Street name, building name, or detailed street-level location.
+    village (Optional[str]): Village or subdistrict level ("Kelurahan" or "Desa").
+    district (Optional[str]): District level administrative area ("Kecamatan").
+    city (Optional[str]): City or regency ("Kota" or "Kabupaten").
+    province (Optional[str]): Province where the company is located.
+    postal_code (Optional[str]): Postal or ZIP code associated with the address.
     """
+
+    full_address: Optional[str] = None
+    street: Optional[str] = None
+    village: Optional[str] = None
+    district: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    postal_code: Optional[str] = None
+
+class CompanySchema(BaseModel):
+    """
+    Company-related metadata extracted from job postings or company profiles.
+
+    This schema captures structured information about the company
+    associated with a job listing.
+
+    Attributes:
+    name (Optional[str]): Official company name.
+    industry (Optional[str]): Industry or sector where the company operates (e.g., Technology, Finance, Healthcare).
+    employee_size (Optional[str]): Estimated number of employees in the company (e.g., "11-50", "51-200", "1000+").
+    address (Optional[CompanyAddress]): Structured company address containing both the original address string and its parsed administrative components.
+    about (Optional[str]): Short description or overview of the company.
+    """
+
     name: Optional[str] = None
     industry: Optional[str] = None
     employee_size: Optional[str] = None
-    address: Optional[str] = None
+    address: Optional[CompanyAddress] = None
     about: Optional[str] = None
 
 
-class RecruiterSchema(BaseModel):
-    """
-    Recruiter or hiring contact metadata.
+class ApplicationStatus(str, Enum):
+    applied = "applied"
+    interview = "interview"
+    offered = "offered"
+    rejected = "rejected"
+    unknown = "unknown"
 
-    Attributes:
-        name (Optional[str]): Recruiter name.
-        initials (Optional[str]): Recruiter initials.
-        last_active (Optional[str]): Last active timestamp.
+
+class TimelineEntry(BaseModel):
     """
-    name: Optional[str] = None
-    initials: Optional[str] = None
-    last_active: Optional[str] = None
+    Represent one status event in the application timeline.
+    """
+
+    status: ApplicationStatus = Field(
+        ...,
+        description="Application status at a specific time."
+    )
+    event_date: Optional[date] = Field(
+        None,
+        description="Date when the status occurred."
+    )
 
 
 class ApplicationSchema(BaseModel):
     """
-    Application lifecycle metadata.
+    Application tracking schema.
 
-    Attributes:
-        status (Literal[...]): Current status of the application.
-        applied_at (Optional[str]): Timestamp when applied.
-        deadline (Optional[str]): Application deadline.
-        notes (Optional[str]): Additional notes or comments.
+    Stores current status and full status timeline.
     """
-    status: Literal[
-        "open",
-        "applied",
-        "interview",
-        "offered",
-        "rejected",
-        "closed",
-        "unknown"
-    ] = Field(default="unknown")
-    applied_at: Optional[str] = None
-    deadline: Optional[str] = None
-    notes: Optional[str] = None
 
+    current_status: ApplicationStatus = ApplicationStatus.unknown
+    timeline: List[TimelineEntry] = Field(
+        default_factory=lambda: [
+            TimelineEntry(
+                status=ApplicationStatus.unknown,
+                event_date=None
+            )
+        ]
+    )
 
-class SourceSchema(BaseModel):
-    """
-    Metadata about the source of the job posting.
+    @model_validator(mode="after")
+    def validate_current_status_exists(self):
+        """
+        Ensure current_status exists inside timeline.
+        """
+        statuses = [entry.status for entry in self.timeline]
 
-    Attributes:
-        platform (Optional[str]): Job portal or platform.
-        language (Optional[str]): Language of the posting.
-    """
-    platform: Optional[str] = None
-    language: Optional[str] = None
+        if self.current_status not in statuses:
+            raise ValueError(
+                "current_status must exist in timeline."
+            )
+
+        return self
 
 
 class JobDocumentSchema(BaseModel):
@@ -302,13 +329,9 @@ class JobDocumentSchema(BaseModel):
         riba (RibaSchema): Riba-related information.
         job (JobSchema): Core job data.
         company (CompanySchema): Company metadata.
-        recruiter (RecruiterSchema): Recruiter data.
         application (ApplicationSchema): Application lifecycle info.
-        source (SourceSchema): Source metadata.
     """
     riba: RibaSchema
     job: JobSchema
     company: CompanySchema
-    recruiter: RecruiterSchema
     application: ApplicationSchema
-    source: SourceSchema

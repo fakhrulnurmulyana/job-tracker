@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 from job_tracker.core import job_validator
 from job_tracker.schemas import JobDocumentSchema
-from job_tracker.services.interface import (
+from job_tracker.orchestration.interface import (
     JobNormalizer, 
     PathResolver, 
     JobDocumentSaver, 

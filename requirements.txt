@@ -1,7 +1,33 @@
-beautifulsoup4==4.14.3
+# LLM API client
 google-genai==1.41.0
+
+# Data validation
 pydantic==2.12.4
+
+# Testing
 pytest==8.4.2
+
+# Environment variables
 python-dotenv==1.1.0
 requests==2.32.5
 undetected-chromedriver==3.5.5
+
+# HTTP requests
+requests==2.32.5
+
+# Jupyter kernel
+ipykernel==7.2.0
+
+# Static visualization
+matplotlib==3.10.8
+
+# Interactive visualization
+plotly==6.5.2
+
+# Data analysis
+pandas==3.0.1
+
+# Notebook format support
+nbformat==5.10.4
+
+wordcloud==1.9.6

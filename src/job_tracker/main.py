@@ -4,7 +4,7 @@ from pathlib import Path
 import job_tracker.logging_config  
 
 from job_tracker.settings import load_gemini_config
-from job_tracker.services import GeminiClient, JobPipelineService
+from job_tracker.services import GeminiClient
 from job_tracker.core import JobNormalizer
 from job_tracker.infrastructure import (
     FileHandler,
@@ -16,6 +16,8 @@ from job_tracker.infrastructure import (
     StealthScrapper,
 )
 import undetected_chromedriver as uc 
+from job_tracker.orchestration import JobPipelineService
+
 
 logger = logging.getLogger(__name__)
 
