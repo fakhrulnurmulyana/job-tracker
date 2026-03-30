@@ -2,11 +2,14 @@
 .env
 .env.test
 
+# vscode
+.vscode/
+
 # Python cache
 *__pycache__
 
 # File data
-/data
+data/
 
 # Logs
 /logs

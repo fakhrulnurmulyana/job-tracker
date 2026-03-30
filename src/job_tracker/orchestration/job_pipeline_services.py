@@ -15,8 +15,7 @@ from job_tracker.orchestration.interface import (
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.orchestration.job_processor import JobProcessor
-
-
+from job_tracker.orchestration.scraper_service import ScraperOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +33,7 @@ class JobPipelineService:
         paths: PathResolver,
         saver: JobDocumentSaver,
         normalizer: JobNormalizer,
+        scraper_orch: ScraperOrchestrator,
     ) -> None:
         """
         Initialize the JobPipelineService with all required dependencies.
@@ -52,6 +52,7 @@ class JobPipelineService:
         self.paths = paths
         self.saver = saver
         self.normalizer = normalizer
+        self.scraper_orch = scraper_orch
 
         logger.debug("JobPipelineService initialized with dependencies.")
 
@@ -176,6 +177,7 @@ class JobPipelineService:
     def process(
         self, 
         file_name: str, 
+        url: str = None
     ) -> None:
         """
         Execute the full job extraction pipeline: create, split, clean,
@@ -195,6 +197,11 @@ class JobPipelineService:
         success = False
 
         try:
+            if url:
+                self.scraper_orch.scrape_and_save(url=url, file_name=file_name)
+            else:
+                self.initiate_file(file_name=file_name)
+
             raw_path = self.initiate_file(file_name=file_name)
 
             split_data = self.split_content(

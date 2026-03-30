@@ -13,12 +13,13 @@ from job_tracker.infrastructure import (
     EditorLauncher,
     PathResolver,
     input_fname,
+    StealthScrapper,
 )
-from job_tracker.orchestration import JobPipelineService
+import undetected_chromedriver as uc 
+from job_tracker.orchestration import JobPipelineService, ScraperOrchestrator
 
 
 logger = logging.getLogger(__name__)
-
 
 def main() -> None:
     """
@@ -50,18 +51,26 @@ def main() -> None:
 
     normalizer = JobNormalizer(client=client)
 
+    # move the paths so we can use it for scrapping
+    paths = PathResolver(base_path=base_path)
+
+    # scraper
+    scraper_tool = StealthScrapper()
+
     pipeline = JobPipelineService(
         editor=EditorLauncher(),
         file_handler=FileHandler(),
         file_splitter=FileSplitter(),
-        paths=PathResolver(base_path=base_path),
+        paths=paths, # changing this
         saver=JobDocumentSaver(),
         normalizer=normalizer,
+        scraper_orch=ScraperOrchestrator(scraper=scraper_tool, paths=paths)
     )
 
     file_name = input_fname()
+    url = input("Enter Glints URL to scrape (leave empty to past manually) : ").strip()
 
-    pipeline.process(file_name)
+    pipeline.process(file_name, url=url if url else None)
 
 
 if __name__ == "__main__":
