@@ -8,7 +8,7 @@ from job_tracker.services import GeminiClient
 from job_tracker.core import JobNormalizer
 from job_tracker.infrastructure import (
     FileHandler,
-    FileSplitter,
+    LinkSplitter,
     JobDocumentSaver,
     EditorLauncher,
     PathResolver,
@@ -16,7 +16,7 @@ from job_tracker.infrastructure import (
     StealthScrapper,
 )
 import undetected_chromedriver as uc 
-from job_tracker.orchestration import JobPipelineService, ScraperOrchestrator
+from job_tracker.orchestration import JobPipelineService
 
 
 logger = logging.getLogger(__name__)
@@ -49,28 +49,20 @@ def main() -> None:
         model=config.model,
     )
 
-    normalizer = JobNormalizer(client=client)
-
-    # move the paths so we can use it for scrapping
-    paths = PathResolver(base_path=base_path)
-
-    # scraper
-    scraper_tool = StealthScrapper()
 
     pipeline = JobPipelineService(
         editor=EditorLauncher(),
         file_handler=FileHandler(),
-        file_splitter=FileSplitter(),
-        paths=paths, # changing this
+        link_splitter= LinkSplitter(),
+        paths=PathResolver(base_path=base_path),
         saver=JobDocumentSaver(),
-        normalizer=normalizer,
-        scraper_orch=ScraperOrchestrator(scraper=scraper_tool, paths=paths)
+        normalizer=JobNormalizer(client=client),
+        scrapper= StealthScrapper(),
     )
 
     file_name = input_fname()
-    url = input("Enter Glints URL to scrape (leave empty to past manually) : ").strip()
 
-    pipeline.process(file_name, url=url if url else None)
+    pipeline.process(file_name)
 
 
 if __name__ == "__main__":
