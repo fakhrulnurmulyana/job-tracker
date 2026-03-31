@@ -2,7 +2,7 @@ from .editor import EditorLauncher
 from .files_handler import FileHandler
 from .file_naming import input_fname, output_fname
 from .job_document_saver import JobDocumentSaver
-from .file_splitter import FileSplitter
+from .link_splitter import LinkSplitter
 from .loading import LoadingStatus
 from .path import PathResolver
 from .scraper import StealthScrapper
@@ -13,7 +13,7 @@ __all__=[
     "EditorLauncher",
     "JobDocumentSaver",
     "FileHandler",
-    "FileSplitter",
+    "LinkSplitter",
     "LoadingStatus",
     "PathResolver",
     "StealthScrapper"
