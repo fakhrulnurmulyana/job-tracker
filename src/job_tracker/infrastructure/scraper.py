@@ -9,6 +9,8 @@ warnings.filterwarnings(
     message=".*handle is invalid"
 )
 
+from typing import List
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ class StealthScrapper:
     def __init__(self, version_main =145):
         self.version_main = version_main
 
-    def fetch_html(self, url:str) -> str:
+    def _fetch_html_one(self, url:str) -> str:
         logger.info("Starting fetch : %s", url)
          
         options = uc.ChromeOptions()
@@ -59,9 +61,8 @@ class StealthScrapper:
                 del driver
                 gc.collect()
 
-            
-            
-
-
-
-
+    def fetch_html(self, links: List[str]) -> List[str]:
+        return [
+            self._fetch_html_one(url=link)
+            for link in links
+        ]
