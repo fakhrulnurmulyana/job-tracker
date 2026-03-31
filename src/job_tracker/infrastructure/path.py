@@ -23,6 +23,9 @@ class PathResolver:
 
         # Define raw and processed data directories
         self.raw_dir = self.data_path / "raw"
+        self.scrap_dir = self.data_path / "scraped"
+        self.split_dir = self.data_path / "splited"
+        self.clean_dir = self.data_path / "cleaned"
         self.finalized_dir = self.data_path / "finalized"
 
     def _ensure_directories(self, path: Path) -> None:
@@ -60,6 +63,36 @@ class PathResolver:
         raw_path = self.raw_dir / f"{name}{suffix}"
         
         return raw_path
+    
+    def scrap_file(self, name: str, suffix: str = ".txt") -> Path:
+        if name == "":
+            raise ValueError("File name must not be empty")
+
+        self._ensure_directories(path=self.scrap_dir)
+        
+        scrap_path = self.scrap_dir / f"{name}{suffix}"
+        
+        return scrap_path
+    
+    def split_file(self, name: str, suffix: str = ".txt") -> Path:
+        if name == "":
+            raise ValueError("File name must not be empty")
+
+        self._ensure_directories(path=self.split_dir )
+        
+        split_path = self.split_dir / f"{name}{suffix}"
+        
+        return split_path
+    
+    def clean_file(self, name: str, suffix: str = ".txt") -> Path:
+        if name == "":
+            raise ValueError("File name must not be empty")
+
+        self._ensure_directories(path=self.clean_dir)
+        
+        clean_path = self.clean_dir / f"{name}{suffix}"
+        
+        return clean_path
     
     def finalized_file(
         self, 
