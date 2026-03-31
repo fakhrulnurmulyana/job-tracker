@@ -217,20 +217,20 @@ class JobPipelineService:
                 content=str(html_content),
             )
 
-            cleaned_data = self.cleaned_content(
-                contents=html_content,
-            )
+            # cleaned_data = self.cleaned_content(
+            #     contents=html_content,
+            # )
 
-            self.file_handler.write(
-                path=self.paths.clean_file(name=file_name),
-                content=str(cleaned_data),
-            )
+            # self.file_handler.write(
+            #     path=self.paths.clean_file(name=file_name),
+            #     content=str(cleaned_data),
+            # )
 
             api_loader.start()
             logger.debug("LoadingStatus started.")
 
             self.normalize_content(
-                contents=cleaned_data,
+                contents=html_content,
                 input_fname=file_name,
             )
 
