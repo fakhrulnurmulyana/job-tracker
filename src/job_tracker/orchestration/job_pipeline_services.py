@@ -8,14 +8,14 @@ from job_tracker.infrastructure import LoadingStatus
 from job_tracker.orchestration.interface import (    
     EditorLauncher,
     FileHandler,
-    FileSplitter,
+    LinkSplitter,
     JobDocumentSaver,
     JobNormalizer,
     PathResolver,
+    StealthScrapper
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.orchestration.job_processor import JobProcessor
-from job_tracker.orchestration.scraper_service import ScraperOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +29,11 @@ class JobPipelineService:
         self,
         editor: EditorLauncher,
         file_handler: FileHandler,
-        file_splitter: FileSplitter,
+        link_splitter: LinkSplitter,
         paths: PathResolver,
         saver: JobDocumentSaver,
         normalizer: JobNormalizer,
-        scraper_orch: ScraperOrchestrator,
+        scrapper: StealthScrapper,
     ) -> None:
         """
         Initialize the JobPipelineService with all required dependencies.
@@ -48,11 +48,11 @@ class JobPipelineService:
         """
         self.editor = editor
         self.file_handler = file_handler
-        self.file_splitter = file_splitter
+        self.link_splitter = link_splitter
         self.paths = paths
         self.saver = saver
         self.normalizer = normalizer
-        self.scraper_orch = scraper_orch
+        self.scrapper = scrapper
 
         logger.debug("JobPipelineService initialized with dependencies.")
 
@@ -79,8 +79,14 @@ class JobPipelineService:
         logger.debug("Editor opened for file %s", raw_path)
 
         return raw_path
+    
+    def scrap_content(
+        self,
+        links,    
+    )-> List[str]:
+        return self.scrapper.fetch_html(links=links)
 
-
+            
     def split_content(
         self,
         read_path: Path,
@@ -100,7 +106,7 @@ class JobPipelineService:
         content = self.file_handler.consume(read_path)
         logger.debug("File consumed successfully: %s", read_path)
 
-        return self.file_splitter.split(data=content)
+        return self.link_splitter.split(links=content)
 
     def cleaned_content(
         self,
@@ -177,7 +183,6 @@ class JobPipelineService:
     def process(
         self, 
         file_name: str, 
-        url: str = None
     ) -> None:
         """
         Execute the full job extraction pipeline: create, split, clean,
@@ -197,19 +202,18 @@ class JobPipelineService:
         success = False
 
         try:
-            if url:
-                self.scraper_orch.scrape_and_save(url=url, file_name=file_name)
-            else:
-                self.initiate_file(file_name=file_name)
-
             raw_path = self.initiate_file(file_name=file_name)
 
-            split_data = self.split_content(
+            split_links = self.split_content(
                 read_path=raw_path
             )
 
+            html_content = self.scrap_content(
+                links=split_links,    
+            )
+
             cleaned_data = self.cleaned_content(
-                contents=split_data,
+                contents=html_content,
             )
 
             api_loader.start()
