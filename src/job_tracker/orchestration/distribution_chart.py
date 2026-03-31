@@ -9,6 +9,7 @@ ChartType = Literal[
     "pie",
     "bar",
     "batch_box_plot",
+    "sunburst",
 ]
 
 
