@@ -212,8 +212,18 @@ class JobPipelineService:
                 links=split_links,    
             )
 
+            self.file_handler.write(
+                path=self.paths.scrap_file(name=file_name),
+                content=str(html_content),
+            )
+
             cleaned_data = self.cleaned_content(
                 contents=html_content,
+            )
+
+            self.file_handler.write(
+                path=self.paths.clean_file(name=file_name),
+                content=str(cleaned_data),
             )
 
             api_loader.start()
