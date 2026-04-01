@@ -4,7 +4,7 @@ from .link_split import LinkSplitter
 from .job_document_sever import JobDocumentSaver
 from .job_normalizer import JobNormalizer
 from .path_resolver import PathResolver
-from .scrapper import StealthScrapper
+from .scraper import StealthScraper
 
 __all__=[
     "EditorLauncher",
@@ -13,5 +13,5 @@ __all__=[
     "JobDocumentSaver",
     "JobNormalizer",
     "PathResolver",
-    "StealthScrapper",
+    "StealthScraper",
     ]

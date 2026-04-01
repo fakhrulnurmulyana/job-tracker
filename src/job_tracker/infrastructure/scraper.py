@@ -22,7 +22,7 @@ def _safe_del(self):
 
 uc.Chrome.__del__ = _safe_del
 
-class StealthScrapper:
+class StealthScraper:
     def __init__(self, version_main =145):
         self.version_main = version_main
 
@@ -47,7 +47,7 @@ class StealthScrapper:
                 raise Exception("Blcok Detected!")
             
             logger.info("Fetch Success")
-            return html[:6000] # set here to determine how many characters the output
+            return html
         
         finally:
             if driver is not None:

@@ -13,7 +13,7 @@ from job_tracker.infrastructure import (
     EditorLauncher,
     PathResolver,
     input_fname,
-    StealthScrapper,
+    StealthScraper,
 )
 import undetected_chromedriver as uc 
 from job_tracker.orchestration import JobPipelineService
@@ -57,7 +57,7 @@ def main() -> None:
         paths=PathResolver(base_path=base_path),
         saver=JobDocumentSaver(),
         normalizer=JobNormalizer(client=client),
-        scrapper= StealthScrapper(),
+        scraper= StealthScraper(),
     )
 
     file_name = input_fname()

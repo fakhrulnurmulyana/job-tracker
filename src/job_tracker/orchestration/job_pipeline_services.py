@@ -12,7 +12,7 @@ from job_tracker.orchestration.interface import (
     JobDocumentSaver,
     JobNormalizer,
     PathResolver,
-    StealthScrapper
+    StealthScraper
 )
 from job_tracker.prompts import build_batch_job_normalization_prompt
 from job_tracker.orchestration.job_processor import JobProcessor
@@ -33,7 +33,7 @@ class JobPipelineService:
         paths: PathResolver,
         saver: JobDocumentSaver,
         normalizer: JobNormalizer,
-        scrapper: StealthScrapper,
+        scraper: StealthScraper,
     ) -> None:
         """
         Initialize the JobPipelineService with all required dependencies.
@@ -52,7 +52,7 @@ class JobPipelineService:
         self.paths = paths
         self.saver = saver
         self.normalizer = normalizer
-        self.scrapper = scrapper
+        self.scraper = scraper
 
         logger.debug("JobPipelineService initialized with dependencies.")
 
@@ -84,7 +84,7 @@ class JobPipelineService:
         self,
         links,    
     )-> List[str]:
-        return self.scrapper.fetch_html(links=links)
+        return self.scraper.fetch_html(links=links)
 
             
     def split_content(

@@ -5,7 +5,7 @@ from .job_document_saver import JobDocumentSaver
 from .link_splitter import LinkSplitter
 from .loading import LoadingStatus
 from .path import PathResolver
-from .scraper import StealthScrapper
+from .scraper import StealthScraper
 
 __all__=[
     "input_fname",
@@ -16,5 +16,5 @@ __all__=[
     "LinkSplitter",
     "LoadingStatus",
     "PathResolver",
-    "StealthScrapper"
+    "StealthScraper"
 ]
