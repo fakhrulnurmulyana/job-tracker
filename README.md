@@ -10,31 +10,25 @@ This project demonstrates:
 * Practical LLM integration for real-world data workflows
 
 > ⚠️ **Project Status**: Active development  
-> Current version: **v3.0.0**
-
+> Current version: **v4.0.0**
 ---
-
-# What's New in v3.0.0
-
-This release introduces a simplified user workflow and improvements to file handling and pipeline execution.
-
+# What's New in v4.0.0
+This release introduces a major overhaul to the user input workflow, replacing manual HTML inspection with a simpler link-based input system.
 ## Changes
-
+- User input method changed from plain text/HTML (via inspect) to direct URL input (single or multiple links).
+- Added web scraping system to automatically extract data from provided links.
+- Output data structure and content updated to reflect the new scraping-based pipeline.
+- Temporarily removed data cleaning step due to inconsistent results from scraped output.
+---
+# Previous Updates (v3.0.0)
+This version introduced a simplified user workflow and improvements to file handling and pipeline execution:
 - Input filenames are now generated automatically based on execution time.
 - Improved file organization under `finalized_data/`.
 - Added validation for company and job position names.
 - Refactored pipeline to operate on validated variables instead of repeated file reads.
 - Simplified saving workflow and removed unnecessary intermediate outputs.
 - General refactoring, cleanup, and documentation improvements.
-
----
-
-# Previous Updates (v2.1.1)
-
-This version introduced improvements focused on output consistency and developer experience:
-
-- Improved output naming consistency
-- Minor internal refinements and cleanup
+--- 
 
 # Purpose
 
@@ -57,10 +51,6 @@ Job Tracker aims to:
 
 Previously:
 
-* 1 file = 1 job
-
-Now:
-
 * 1 file can contain **multiple jobs**
 * Jobs are separated using:
 
@@ -79,6 +69,16 @@ Requirements: ...
 Data Engineer - Remote
 Requirements: ...
 ```
+Now:
+
+* Just input link or multiple links.
+* Links are separated using space.
+
+Example:
+
+```
+https://job_tranker.com https://job_tranker.com https://job_tranker.com
+```
 
 The system will:
 
@@ -90,14 +90,11 @@ The system will:
 
 ## 2. HTML Input Support
 
-Some job portals prevent direct copy-paste of clean text.
-
 You can now:
 
-* Paste raw HTML (e.g., from browser Inspect Element)
+* Paste just link or links.
 * The system automatically:
 
-  * Cleans HTML
   * Extracts readable text
   * Normalizes it using Gemini
 
@@ -131,29 +128,35 @@ Logs are excluded from version control.
 
 ```
 JOB-TRACKER
-│
 ├── data/
 ├── logs/
-│
 ├── src/
 │   └── job_tracker/
-│       │
 │       ├── core/
+│       │   ├── interface/
 │       │   ├── __init__.py
 │       │   ├── job_normalizer.py
 │       │   ├── job_validator.py
-│       │   ├── llm_client.py
-│       │   └── text_cleaner.py
+│       │   ├── text_cleaner.py
+│       │   └── text_parser.py
 │       │
 │       ├── infrastructure/
 │       │   ├── __init__.py
 │       │   ├── editor.py
 │       │   ├── file_naming.py
-│       │   ├── file_splitter.py
 │       │   ├── files_handler.py
 │       │   ├── job_document_saver.py
+│       │   ├── link_splitter.py
 │       │   ├── loading.py
-│       │   └── path.py
+│       │   ├── path.py
+│       │   └── scraper.py
+│       │
+│       ├── orchestration/
+│       │   ├── interface/
+│       │   ├── __init__.py
+│       │   ├── distribution_chart.py
+│       │   ├── job_pipeline_services.py
+│       │   └── job_processor.py
 │       │
 │       ├── prompts/
 │       │   ├── __init__.py
@@ -163,21 +166,12 @@ JOB-TRACKER
 │       │   ├── __init__.py
 │       │   └── job_schema.py
 │       │
-│       └── services/
-│           │
-│           ├── interface/
-│           │   ├── __init__.py
-│           │   ├── editor_launcer.py
-│           │   ├── file_handler.py
-│           │   ├── file_split.py
-│           │   ├── job_document_sever.py
-│           │   ├── job_normalizer.py
-│           │   └── path_resolver.py
-│           │
+│       ├── services/
+│       │   ├── __init__.py
+│       │   └── gemini_client.py
+│       │
+│       └── visualization/
 │           ├── __init__.py
-│           ├── gemini_client.py
-│           ├── job_pipeline_services.py
-│           ├── job_processor.py
 │           ├── logging_config.py
 │           ├── main.py
 │           └── settings.py
@@ -230,13 +224,13 @@ python -m job_tracker.main
 1. Local editor opens
 2. User inputs:
 
-   * Plain text OR
-   * Raw HTML OR
-   * Multiple jobs separated by `==JOB==`
+   * link.
+   * Multiple links separated by space.
+
 3. System:
 
-   * Splits jobs
-   * Cleans HTML
+   * Splits links.
+   * scrap html.
    * Normalizes each job via Gemini
    * Validates schema
    * Saves structured JSON output
@@ -249,6 +243,8 @@ python -m job_tracker.main
 * `pydantic`
 * `python-dotenv`
 * `beautifulsoup4` (for HTML parsing)
+* requests
+* undetected-chromedriver
 
 ---
 
@@ -260,7 +256,6 @@ Planned improvements:
 * REST API interface
 * Web UI
 * Vector database integration (RAG)
-* Automatic URL ingestion
 * Schema versioning strategy
 * Pluggable LLM providers
 
