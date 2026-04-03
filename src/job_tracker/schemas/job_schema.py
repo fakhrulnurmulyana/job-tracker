@@ -322,16 +322,7 @@ class ApplicationSchema(BaseModel):
 
 
 class JobDocumentSchema(BaseModel):
-    """
-    Aggregated normalized job document (schema v2).
-
-    Attributes:
-        riba (RibaSchema): Riba-related information.
-        job (JobSchema): Core job data.
-        company (CompanySchema): Company metadata.
-        application (ApplicationSchema): Application lifecycle info.
-    """
-    riba: RibaSchema
-    job: JobSchema
-    company: CompanySchema
-    application: ApplicationSchema
+    riba: RibaSchema = Field(default_factory=lambda: RibaSchema(is_riba=False, relation="none"))
+    job: JobSchema = Field(default_factory=lambda: JobSchema(link="https://placeholder.com"))
+    company: CompanySchema = Field(default_factory=CompanySchema)
+    application: ApplicationSchema = Field(default_factory=ApplicationSchema)
