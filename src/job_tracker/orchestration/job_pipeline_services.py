@@ -3,9 +3,8 @@ import logging
 from pathlib import Path
 from typing import List
 
-from job_tracker.core import batch_strip_html
 from job_tracker.infrastructure import LoadingStatus
-from job_tracker.orchestration.interface import (    
+from job_tracker.orchestration.interface import (
     EditorLauncher,
     FileHandler,
     LinkSplitter,
@@ -79,14 +78,14 @@ class JobPipelineService:
         logger.debug("Editor opened for file %s", raw_path)
 
         return raw_path
-    
+
     def scrap_content(
         self,
-        links,    
+        links,
     )-> List[str]:
         return self.scraper.fetch_html(links=links)
 
-            
+
     def split_content(
         self,
         read_path: Path,
@@ -127,7 +126,7 @@ class JobPipelineService:
         return batch_strip_html(batch_html=contents)
 
     def normalize_content(
-        self, 
+        self,
         contents: List[str],
         input_fname: str,
     ) -> None:
@@ -168,7 +167,7 @@ class JobPipelineService:
 
         job_processor= JobProcessor(
             prompts=prompts,
-            normalizer=self.normalizer, 
+            normalizer=self.normalizer,
             paths=self.paths,
             saver=self.saver,
             handler=self.file_handler,
@@ -176,13 +175,13 @@ class JobPipelineService:
         )
 
         job_processor.process()
-    
+
         logger.info("Finalized job documents saved successfully.")
 
 
     def process(
-        self, 
-        file_name: str, 
+        self,
+        file_name: str,
     ) -> None:
         """
         Execute the full job extraction pipeline: create, split, clean,
@@ -209,7 +208,7 @@ class JobPipelineService:
             )
 
             html_content = self.scrap_content(
-                links=split_links,    
+                links=split_links,
             )
 
             self.file_handler.write(
