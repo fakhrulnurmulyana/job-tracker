@@ -185,8 +185,8 @@ JOB-TRACKER
 
 # Requirements
 
-* Python 3.10+
-* Google Gemini API key
+- Python 3.11
+- A Google Gemini API key
 
 ---
 
